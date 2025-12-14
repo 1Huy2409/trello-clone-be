@@ -1,6 +1,7 @@
 import { List } from "@/common/entities/list.entity";
 import { EntityManager } from "typeorm";
 export interface IListRepository {
+    findFullListById(id: string, manager?: EntityManager): Promise<List | null>;
     findById(id: string, manager?: EntityManager): Promise<List | null>;
     findAll(manager?: EntityManager): Promise<List[]>;
     findListByTitleAndBoardId(title: string, boardId: string, manager?: EntityManager): Promise<List | null>;

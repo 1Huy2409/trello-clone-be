@@ -47,6 +47,9 @@ import { Card } from '../entities/card.entity';
 import { CardRepository } from '@/apis/card/repositories/card.repository';
 import ListService from '@/apis/list/list.service';
 import { ListRepository } from '@/apis/list/repositories/list.repository'
+import ListController from '@/apis/list/list.controller'
+import listRouter from '@/apis/list/list.router'
+import { registerListPaths } from '@/apis/list/list.openapi'
 
 const mainRouter: Router = express.Router()
 const initHealthCheckModule = () => {
@@ -140,10 +143,28 @@ const initBoardModule = () => {
 
     mainRouter.use('/boards', boardRouter(boardController))
 }
+const initListModule = () => {
+    const listOrmRepo = AppDataSource.getRepository(List);
+    const listRepository = new ListRepository(listOrmRepo);
+    const boardOrmRepo = AppDataSource.getRepository(Board);
+    const boardRepository = new BoardRepository(boardOrmRepo);
+    const cardOrmRepo = AppDataSource.getRepository(Card);
+    const cardRepository = new CardRepository(cardOrmRepo);
+    const listService = new ListService(
+        listRepository,
+        boardRepository,
+        cardRepository,
+        AppDataSource
+    )
+    registerListPaths();
+    const listController = new ListController(listService);
+    mainRouter.use('/lists', listRouter(listController))
+}
 initHealthCheckModule();
 initAuthModule();
 initUserModule();
 initWorkspaceModule();
 initJoinLinkModule();
 initBoardModule();
+initListModule();
 export default mainRouter;

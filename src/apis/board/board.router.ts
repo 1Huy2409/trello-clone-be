@@ -193,6 +193,26 @@ export default function boardRouter(boardController: BoardController): Router {
         asyncHandler(checkBoardPermission(PERMISSIONS.BOARD_VIEW_MEMBERS)),
         asyncHandler(boardController.getBoardJoinLinks))
 
+    boardRegistry.registerPath({
+        method: 'get',
+        path: '/api/v1/boards/{boardId}/lists',
+        tags: ['List'],
+        security: [{ bearerAuth: [] }],
+        request: {
+            params: z.object({
+                boardId: z.uuid().openapi({
+                    example: 'b9860e4c-5ba0-4715-b483-87fc69bfc6ef',
+                    description: 'Board UUID',
+                    format: 'uuid'
+                })
+            })
+        },
+        responses: createApiResponse(z.array(ListResponseSchema), 'Success')
+    })
+    router.get('/:boardId/lists',
+        asyncHandler(checkAuthentication),
+        asyncHandler(checkBoardPermission(PERMISSIONS.LIST_VIEW)),
+        asyncHandler(boardController.getListsByBoardId))
     // Get board members
     boardRegistry.registerPath({
         method: 'get',

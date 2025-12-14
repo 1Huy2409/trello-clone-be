@@ -77,7 +77,7 @@ export const CopyListRequest: ZodRequestBody = {
     description: 'Copy list',
     content: {
         'application/json': {
-            schema: CopyListSchema.openapi({ example: { listId: 'a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6', title: 'To Do Copy' } })
+            schema: CopyListSchema.openapi({ example: { listId: 'a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6', targetBoardId: 'z9y8x7w6-v5u4-t3s2-r1q0-p9o8n7m6l5k4', title: 'To Do Copy' } })
         }
     }
 }

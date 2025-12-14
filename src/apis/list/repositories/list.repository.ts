@@ -5,6 +5,10 @@ import { IListRepository } from "./list.repository.interface";
 export class ListRepository implements IListRepository {
     constructor(private listRepository: Repository<List>) { }
 
+    async findFullListById(id: string, manager?: EntityManager): Promise<List | null> {
+        const repo = manager ? manager.getRepository(List) : this.listRepository;
+        return await repo.findOne({ where: { id }, relations: ['cards'] });
+    }
     async findById(id: string, manager?: EntityManager): Promise<List | null> {
         const repo = manager ? manager.getRepository(List) : this.listRepository;
         return await repo.findOne({ where: { id, isArchived: false }, relations: ['cards'] });
@@ -12,7 +16,7 @@ export class ListRepository implements IListRepository {
     async findAll(manager?: EntityManager): Promise<List[]> {
         const repo = manager ? manager.getRepository(List) : this.listRepository;
         return await repo.find(
-            { where: { isArchived: false }, relations: ['cards'] }
+            { where: { isArchived: false }, relations: ['cards'], order: { position: 'ASC' } }
         );
     }
     async findListByTitleAndBoardId(title: string, boardId: string, manager?: EntityManager): Promise<List | null> {
@@ -63,7 +67,7 @@ export class ListRepository implements IListRepository {
     }
     async reorder(id: string, position: string, manager?: EntityManager): Promise<List> {
         const repo = manager ? manager.getRepository(List) : this.listRepository;
-        const list = await repo.findOne({ where: { id }, relations: ['cards'] });
+        const list = await repo.findOne({ where: { id, isArchived: true }, relations: ['cards'] });
         if (!list) {
             throw new Error(`List with ID ${id} not found`);
         }

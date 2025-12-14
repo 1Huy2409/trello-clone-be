@@ -15,6 +15,10 @@ export default class ListService {
         private cardRepository: ICardRepository,
         private dataSource: DataSource
     ) { }
+    getAll = async (boardId: string): Promise<ListResponse[]> => {
+        const lists = await this.listRepository.findListsByBoardId(boardId);
+        return lists.map(toListResponse);
+    }
     createList = async (data: CreateListSchema, boardId: string): Promise<ListResponse> => {
         let defaultPosition: string = POSITION_INCREMENT.toString();
         const currentLists = await this.listRepository.findListsSortedByPosition(boardId);
@@ -63,7 +67,10 @@ export default class ListService {
             }
             const beforeList = beforeListId ? await this.listRepository.findById(beforeListId, mananger) : null;
             const afterList = afterListId ? await this.listRepository.findById(afterListId, mananger) : null;
-            const newPosition = calculateNewPosition(beforeList?.position, afterList?.position);
+            const newPosition = calculateNewPosition(
+                beforeList?.position ?? null,
+                afterList?.position ?? null
+            );
             reorderList.position = newPosition;
             const reorderedList = await this.listRepository.update(listId, reorderList);
             return toListResponse(reorderedList);
@@ -82,7 +89,10 @@ export default class ListService {
             }
             const beforeList = beforeListId ? await this.listRepository.findById(beforeListId) : null;
             const afterList = afterListId ? await this.listRepository.findById(afterListId) : null;
-            const newPosition = calculateNewPosition(beforeList?.position, afterList?.position);
+            const newPosition = calculateNewPosition(
+                beforeList?.position ?? null,
+                afterList?.position ?? null
+            );
             listToMove.boardId = targetBoardId;
             listToMove.position = newPosition;
             const movedList = await this.listRepository.update(listId, listToMove);
@@ -104,7 +114,10 @@ export default class ListService {
             const currentIndex = allLists.findIndex(list => list.id === listId);
             const beforeList = allLists[currentIndex];
             const afterList = allLists[currentIndex + 1] || null;
-            const newPosition = calculateNewPosition(beforeList?.position, afterList?.position);
+            const newPosition = calculateNewPosition(
+                beforeList?.position ?? null,
+                afterList?.position ?? null
+            );
             const copiedList = await this.listRepository.create({
                 title,
                 boardId: targetBoardId ? targetBoardId : listToCopy.boardId,
