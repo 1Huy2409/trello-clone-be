@@ -39,6 +39,7 @@ export const checkBoardPermission = (requiredPermission: PermissionKey) => {
                 throw new AuthFailureError('User not authenticated', 401);
             }
             const boardId = req.params.boardId || req.params.id || req.body.boardId;
+            console.log("Checking board permission for boardId:", boardId);
             if (!boardId) {
                 throw new BadRequestError('Board ID is required');
             }

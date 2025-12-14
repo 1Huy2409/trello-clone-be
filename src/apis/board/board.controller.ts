@@ -5,10 +5,13 @@ import { StatusCodes } from "http-status-codes";
 import { handleServiceResponse } from "@/common/utils/httpHandler";
 import { AuthFailureError, BadRequestError } from "@/common/handler/error.response";
 import { CreateBoardWithWorkspaceSchema, UpdateBoardSchema, CreateBoardJoinLinkDto, JoinBoardByLinkDto, InviteByEmailDto } from "./schemas";
+import { CreateListSchema } from "../list/schemas";
+import ListService from "../list/list.service";
 
 export default class BoardController {
     constructor(
-        private boardService: BoardService
+        private boardService: BoardService,
+        private listService: ListService
     ) { }
     createBoard = async (req: Request, res: Response) => {
         const userId = req.user?.id;
@@ -240,6 +243,23 @@ export default class BoardController {
             'Get board members successfully',
             members,
             StatusCodes.OK
+        )
+        return handleServiceResponse(serviceResponse, res);
+    }
+    // manage lists here
+    createList = async (req: Request, res: Response) => {
+        console.log("Controller - createList called");
+        const { boardId } = req.params;
+        if (!boardId) {
+            throw new BadRequestError('Board id is required');
+        }
+        const data: CreateListSchema = req.body;
+        const newList = await this.listService.createList(data, boardId);
+        const serviceResponse = new ServiceResponse(
+            ResponseStatus.Sucess,
+            'Create list successfully',
+            newList,
+            StatusCodes.CREATED
         )
         return handleServiceResponse(serviceResponse, res);
     }

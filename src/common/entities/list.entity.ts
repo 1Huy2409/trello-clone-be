@@ -11,8 +11,12 @@ export class List extends DateTimeEntity {
     @Column({ type: 'varchar', length: 255, nullable: false })
     title: string
 
-    @Column({ type: 'decimal', default: 0 })
-    position: number
+    @Column({
+        type: 'numeric',
+        precision: 20,
+        scale: 10,
+    })
+    position: string;
 
     @Column({ type: 'boolean', default: false })
     isArchived: boolean

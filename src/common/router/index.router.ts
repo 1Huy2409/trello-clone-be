@@ -41,6 +41,12 @@ import { RolePermission } from '../entities/role-permission.entity'
 import { WorkspaceRoleService } from '@/apis/workspace/workspace-role.service'
 import { RbacCacheService } from '../rbac/rbac.cache.service'
 import { RbacService } from '../rbac/rbac.service'
+import listService from '@/apis/list/list.service'
+import { List } from '../entities/list.entity'
+import { Card } from '../entities/card.entity';
+import { CardRepository } from '@/apis/card/repositories/card.repository';
+import ListService from '@/apis/list/list.service';
+import { ListRepository } from '@/apis/list/repositories/list.repository'
 
 const mainRouter: Router = express.Router()
 const initHealthCheckModule = () => {
@@ -102,6 +108,10 @@ const initJoinLinkModule = () => {
 const initBoardModule = () => {
     const boardOrmRepo = AppDataSource.getRepository(Board);
     const boardRepository = new BoardRepository(boardOrmRepo);
+    const listOrmRepo = AppDataSource.getRepository(List);
+    const listRepository = new ListRepository(listOrmRepo);
+    const cardOrmRepo = AppDataSource.getRepository(Card);
+    const cardRepository = new CardRepository(cardOrmRepo);
     const workspaceOrmRepo = AppDataSource.getRepository(Workspace);
     const workspaceRepository = new WorkspaceRepository(workspaceOrmRepo);
     const boardJoinLinkOrmRepo = AppDataSource.getRepository(BoardJoinLink);
@@ -113,14 +123,20 @@ const initBoardModule = () => {
     const userOrmRepo = AppDataSource.getRepository(User);
     const userRepository = new UserRepository(userOrmRepo);
     const boardService = new BoardService(
-        boardRepository, 
-        workspaceRepository, 
+        boardRepository,
+        workspaceRepository,
         boardJoinLinkRepository,
         boardMemberRepository,
         roleRepository,
         userRepository
     );
-    const boardController = new BoardController(boardService);
+    const listService = new ListService(
+        listRepository,
+        boardRepository,
+        cardRepository,
+        AppDataSource
+    )
+    const boardController = new BoardController(boardService, listService);
 
     mainRouter.use('/boards', boardRouter(boardController))
 }

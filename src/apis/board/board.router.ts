@@ -3,10 +3,10 @@ import { Router } from "express";
 import BoardController from "./board.controller";
 import { asyncHandler } from "@/common/middleware/asyncHandler";
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
-import { 
-    BoardResponseSchema, 
-    ListBoardResponseSchema, 
-    PostBoardWithWorkspaceRequest, 
+import {
+    BoardResponseSchema,
+    ListBoardResponseSchema,
+    PostBoardWithWorkspaceRequest,
     PatchBoardRequest,
     PostBoardJoinLinkRequest,
     BoardJoinLinkResponseSchema,
@@ -14,10 +14,12 @@ import {
     PostJoinBoardByLinkRequest,
     PostInviteByEmailRequest
 } from "./schemas";
+import { ListResponseSchema } from "../list/schemas/list.response.schema";
 import { createApiResponse } from '@/api-docs/openAPIResponseBuilder';
 import { checkAuthentication } from "@/common/middleware/authentication";
 import { checkBoardPermission, checkWorkspacePermission } from "@/common/middleware/authorization";
 import { PERMISSIONS } from "@/common/constants/permissions";
+import { CopyListRequest, MoveListRequest, PostListRequest, ReorderListRequest } from "../list/schemas/list.request.schema";
 
 export const boardRegistry = new OpenAPIRegistry()
 boardRegistry.register('Board', BoardResponseSchema)
@@ -48,6 +50,29 @@ export default function boardRouter(boardController: BoardController): Router {
         asyncHandler(checkAuthentication),
         asyncHandler(checkWorkspacePermission(PERMISSIONS.BOARD_CREATE)),
         asyncHandler(boardController.createBoard))
+
+    // Begin manage lists - must be defined before /:id routes to avoid param conflicts
+    boardRegistry.registerPath({
+        method: 'post',
+        path: '/api/v1/boards/{boardId}/lists',
+        tags: ['Board'],
+        security: [{ bearerAuth: [] }],
+        request: {
+            params: z.object({
+                boardId: z.uuid().openapi({
+                    example: 'b9860e4c-5ba0-4715-b483-87fc69bfc6ef',
+                    description: 'Board UUID',
+                    format: 'uuid'
+                })
+            }),
+            body: PostListRequest
+        },
+        responses: createApiResponse(ListResponseSchema, 'Success')
+    })
+    router.post('/:boardId/lists',
+        asyncHandler(checkAuthentication),
+        asyncHandler(checkBoardPermission(PERMISSIONS.LIST_CREATE)),
+        asyncHandler(boardController.createList))
 
     boardRegistry.registerPath({
         method: 'get',
@@ -346,5 +371,6 @@ export default function boardRouter(boardController: BoardController): Router {
         asyncHandler(checkAuthentication),
         asyncHandler(checkBoardPermission(PERMISSIONS.BOARD_UPDATE)),
         asyncHandler(boardController.changeOwner))
+
     return router;
 }
