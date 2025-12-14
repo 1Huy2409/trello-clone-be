@@ -11,6 +11,9 @@ export class CardMember extends DateTimeEntity {
     @Column({ type: 'int' })
     role: number
 
+    @Column({ type: 'uuid' })
+    cardId: string
+
     @ManyToOne(() => Card, (card) => card.cardMembers)
     card: Card
 

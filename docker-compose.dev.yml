@@ -1,14 +1,14 @@
 services:
   postgres:
     image: postgres:17
-    container_name: pg_db
+    container_name: pg_db_dev
     ports: 
-      - "5437:5432"
+      - "${POSTGRES_PORT}:5432"
     restart: on-failure
     env_file:
       - .env
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_2:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 30s
@@ -16,7 +16,7 @@ services:
       retries: 5
       start_period: 30s
     networks:
-      - task-management-network
+      - task-management-v2-network
   redis: 
     image: redis:8-alpine
     container_name: redis_cache
@@ -26,12 +26,12 @@ services:
       - .env
     command: redis-server --appendonly yes
     volumes: 
-      - redis_data:/data
+      - redis_data_2:/data
     networks:
-      - task-management-network
+      - task-management-v2-network
 volumes: 
-  postgres_data:
-  redis_data:
+  postgres_data_2:
+  redis_data_2:
 networks:
-  task-management-network:
+  task-management-v2-network:
     driver: bridge
