@@ -32,13 +32,31 @@ export class SeedRolesAndPermissions1730000000000 implements MigrationInterface 
             { action: PERMISSIONS.WORKSPACE_MANAGE_MEMBERS, resourceType: ResourceType.WORKSPACE, description: 'Add, remove, and update workspace members' },
             { action: PERMISSIONS.WORKSPACE_VIEW_MEMBERS, resourceType: ResourceType.WORKSPACE, description: 'View workspace members list' },
             { action: PERMISSIONS.WORKSPACE_MANAGE_ROLES, resourceType: ResourceType.WORKSPACE, description: 'Manage roles & permissions in workspace' },
-            // BOARD – phải là ResourceType.BOARD
+
+            // BOARD
             { action: PERMISSIONS.BOARD_VIEW, resourceType: ResourceType.BOARD, description: 'View board details' },
             { action: PERMISSIONS.BOARD_CREATE, resourceType: ResourceType.BOARD, description: 'Create new board in workspace' },
             { action: PERMISSIONS.BOARD_UPDATE, resourceType: ResourceType.BOARD, description: 'Update board details' },
             { action: PERMISSIONS.BOARD_DELETE, resourceType: ResourceType.BOARD, description: 'Delete board from workspace' },
             { action: PERMISSIONS.BOARD_MANAGE_MEMBERS, resourceType: ResourceType.BOARD, description: 'Add, remove, and update board members' },
             { action: PERMISSIONS.BOARD_VIEW_MEMBERS, resourceType: ResourceType.BOARD, description: 'View board members list' },
+            { action: PERMISSIONS.LIST_VIEW, resourceType: ResourceType.LIST, description: 'View lists in board' },
+            { action: PERMISSIONS.LIST_CREATE, resourceType: ResourceType.LIST, description: 'Create new list' },
+            { action: PERMISSIONS.LIST_UPDATE, resourceType: ResourceType.LIST, description: 'Update list details' },
+            { action: PERMISSIONS.LIST_DELETE, resourceType: ResourceType.LIST, description: 'Delete list' },
+
+            // CARD Permissions
+            { action: PERMISSIONS.CARD_VIEW, resourceType: ResourceType.CARD, description: 'View cards in list' },
+            { action: PERMISSIONS.CARD_CREATE, resourceType: ResourceType.CARD, description: 'Create new card' },
+            { action: PERMISSIONS.CARD_UPDATE, resourceType: ResourceType.CARD, description: 'Update card details' },
+            { action: PERMISSIONS.CARD_DELETE, resourceType: ResourceType.CARD, description: 'Delete card' },
+            { action: PERMISSIONS.CARD_ASSIGN, resourceType: ResourceType.CARD, description: 'Assign card to members' },
+
+            // COMMENT Permissions
+            { action: PERMISSIONS.COMMENT_VIEW, resourceType: ResourceType.COMMENT, description: 'View comments' },
+            { action: PERMISSIONS.COMMENT_CREATE, resourceType: ResourceType.COMMENT, description: 'Create comment' },
+            { action: PERMISSIONS.COMMENT_UPDATE, resourceType: ResourceType.COMMENT, description: 'Update own comment' },
+            { action: PERMISSIONS.COMMENT_DELETE, resourceType: ResourceType.COMMENT, description: 'Delete own comment' },
         ];
 
         const createdPermissions = await permissionRepository.save(permissionsData);
@@ -80,7 +98,20 @@ export class SeedRolesAndPermissions1730000000000 implements MigrationInterface 
             PERMISSIONS.BOARD_DELETE,
             PERMISSIONS.BOARD_MANAGE_MEMBERS,
             PERMISSIONS.BOARD_VIEW_MEMBERS,
-            PERMISSIONS.WORKSPACE_MANAGE_ROLES
+            PERMISSIONS.WORKSPACE_MANAGE_ROLES,
+            PERMISSIONS.LIST_VIEW,
+            PERMISSIONS.LIST_CREATE,
+            PERMISSIONS.LIST_UPDATE,
+            PERMISSIONS.LIST_DELETE,
+            PERMISSIONS.CARD_VIEW,
+            PERMISSIONS.CARD_CREATE,
+            PERMISSIONS.CARD_UPDATE,
+            PERMISSIONS.CARD_DELETE,
+            PERMISSIONS.CARD_ASSIGN,
+            PERMISSIONS.COMMENT_VIEW,
+            PERMISSIONS.COMMENT_CREATE,
+            PERMISSIONS.COMMENT_UPDATE,
+            PERMISSIONS.COMMENT_DELETE,
         ];
 
         const workspaceAdminPermissions = workspaceAdminActions
@@ -107,6 +138,14 @@ export class SeedRolesAndPermissions1730000000000 implements MigrationInterface 
             PERMISSIONS.BOARD_VIEW,
             PERMISSIONS.BOARD_CREATE,
             PERMISSIONS.BOARD_VIEW_MEMBERS,
+            PERMISSIONS.LIST_VIEW,
+            PERMISSIONS.LIST_CREATE,
+            PERMISSIONS.CARD_VIEW,
+            PERMISSIONS.CARD_CREATE,
+            PERMISSIONS.CARD_UPDATE,
+            PERMISSIONS.COMMENT_VIEW,
+            PERMISSIONS.COMMENT_CREATE,
+            PERMISSIONS.COMMENT_UPDATE,
         ];
 
         const workspaceMemberPermissions = workspaceMemberActions
@@ -133,6 +172,19 @@ export class SeedRolesAndPermissions1730000000000 implements MigrationInterface 
             PERMISSIONS.BOARD_DELETE,
             PERMISSIONS.BOARD_MANAGE_MEMBERS,
             PERMISSIONS.BOARD_VIEW_MEMBERS,
+            PERMISSIONS.LIST_VIEW,
+            PERMISSIONS.LIST_CREATE,
+            PERMISSIONS.LIST_UPDATE,
+            PERMISSIONS.LIST_DELETE,
+            PERMISSIONS.CARD_VIEW,
+            PERMISSIONS.CARD_CREATE,
+            PERMISSIONS.CARD_UPDATE,
+            PERMISSIONS.CARD_DELETE,
+            PERMISSIONS.CARD_ASSIGN,
+            PERMISSIONS.COMMENT_VIEW,
+            PERMISSIONS.COMMENT_CREATE,
+            PERMISSIONS.COMMENT_UPDATE,
+            PERMISSIONS.COMMENT_DELETE,
         ];
 
         const boardOwnerPermissions = boardOwnerActions
@@ -158,6 +210,19 @@ export class SeedRolesAndPermissions1730000000000 implements MigrationInterface 
             PERMISSIONS.BOARD_UPDATE,
             PERMISSIONS.BOARD_MANAGE_MEMBERS,
             PERMISSIONS.BOARD_VIEW_MEMBERS,
+            PERMISSIONS.LIST_VIEW,
+            PERMISSIONS.LIST_CREATE,
+            PERMISSIONS.LIST_UPDATE,
+            PERMISSIONS.LIST_DELETE,
+            PERMISSIONS.CARD_VIEW,
+            PERMISSIONS.CARD_CREATE,
+            PERMISSIONS.CARD_UPDATE,
+            PERMISSIONS.CARD_DELETE,
+            PERMISSIONS.CARD_ASSIGN,
+            PERMISSIONS.COMMENT_VIEW,
+            PERMISSIONS.COMMENT_CREATE,
+            PERMISSIONS.COMMENT_UPDATE,
+            PERMISSIONS.COMMENT_DELETE,
         ];
 
         const boardAdminPermissions = boardAdminActions
@@ -181,6 +246,13 @@ export class SeedRolesAndPermissions1730000000000 implements MigrationInterface 
         const boardMemberActions = [
             PERMISSIONS.BOARD_VIEW,
             PERMISSIONS.BOARD_VIEW_MEMBERS,
+            PERMISSIONS.LIST_VIEW,
+            PERMISSIONS.CARD_VIEW,
+            PERMISSIONS.CARD_CREATE,
+            PERMISSIONS.CARD_UPDATE,
+            PERMISSIONS.COMMENT_VIEW,
+            PERMISSIONS.COMMENT_CREATE,
+            PERMISSIONS.COMMENT_UPDATE,
         ];
 
         const boardMemberPermissions = boardMemberActions

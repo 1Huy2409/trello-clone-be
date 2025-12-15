@@ -1,14 +1,13 @@
-import { AddWorkspaceMemberSchema, UpdateWorkspaceMemberRoleSchema } from './schemas/workspace-member/workspace-member.request.schema';
-import { Workspace, WorkspaceStatus } from "@/common/entities/workspace.entity";
+import { UpdateWorkspaceMemberRoleSchema } from './schemas/workspace-member/workspace-member.request.schema';
+import { WorkspaceStatus } from "@/common/entities/workspace.entity";
 import { ConflictRequestError, NotFoundError } from "@/common/handler/error.response";
-import { Repository } from "typeorm";
 import { CreateWorkspaceSchema, UpdateWorkspaceSchema, WorkspaceMemberResponse, WorkspaceResponse } from "./schemas";
 import { toWorkspaceResponse } from "./mapper/workspace.mapper";
 import { WorkspaceMember } from "@/common/entities/workspace-member.entity";
-import { Board, BoardVisibility, BoardStatus } from '@/common/entities/board.entity';
-import { BoardResponse, CreateBoardSchema, UpdateBoardSchema } from '../board/schemas';
+import { BoardVisibility, BoardStatus } from '@/common/entities/board.entity';
+import { BoardResponse, CreateBoardSchema } from '../board/schemas';
 import { toBoardResponse } from '../board/mapper/board.mapper';
-import { Role, RoleScope } from '@/common/entities/role.entity';
+import { RoleScope } from '@/common/entities/role.entity';
 import { IWorkspaceRepository } from './repositories/workspace.repository.interface';
 import { IWorkspaceMemberRepository } from './repositories/workspace-member.repository.interface';
 import { IBoardRepository } from '../board/repositories/board.repository.interface';
@@ -205,63 +204,6 @@ export default class WorkspaceService {
         await this.rbacService.onUserRemovedFromWorkspace(userId, workspaceId);
         return {
             message: 'Remove member from workspace successfully!'
-        }
-    }
-    // board management in workspace
-    getAllBoardFromWorkspace = async (workspaceId: string): Promise<BoardResponse[]> => {
-        const workspace = await this.workspaceRepository.findById(workspaceId);
-        if (!workspace) {
-            throw new NotFoundError(`Workspace with id ${workspaceId} not found`);
-        }
-        const boards = await this.boardRepository.findBoardsByWorkspaceId(workspaceId);
-        return boards.map(toBoardResponse);
-    }
-    addBoardToWorkspace = async (workspaceId: string, boardData: CreateBoardSchema, ownerId: string): Promise<BoardResponse> => {
-        const workspace = await this.workspaceRepository.findById(workspaceId);
-        if (!workspace) {
-            throw new NotFoundError(`Workspace with id ${workspaceId} not found`);
-        }
-        const newBoard = await this.boardRepository.create({
-            title: boardData.title,
-            description: boardData.description ?? '',
-            coverUrl: boardData.coverUrl ?? '',
-            visibility: boardData.visibility ?? BoardVisibility.WORKSPACE,
-            workspaceId: workspaceId,
-            ownerId: ownerId,
-            createdBy: ownerId
-        });
-        return toBoardResponse(newBoard);
-    }
-    updateBoardInWorkspace = async (workspaceId: string, boardId: string, boardData: UpdateBoardSchema): Promise<BoardResponse> => {
-        const workspace = await this.workspaceRepository.findById(workspaceId);
-        if (!workspace) {
-            throw new NotFoundError(`Workspace with id ${workspaceId} not found`);
-        }
-        const board = await this.boardRepository.findBoardByWorkspaceId(boardId, workspaceId);
-        if (!board) {
-            throw new NotFoundError(`Board with id ${boardId} not found in workspace with id ${workspaceId}`);
-        }
-        board.title = boardData.title ?? board.title;
-        board.description = boardData.description ?? board.description;
-        board.coverUrl = boardData.coverUrl ?? board.coverUrl;
-        board.visibility = boardData.visibility ?? board.visibility;
-        await this.boardRepository.update(board.id, board);
-        return toBoardResponse(board);
-    }
-    deleteBoardInWorkspace = async (workspaceId: string, boardId: string): Promise<{ message: string }> => {
-        const workspace = await this.workspaceRepository.findById(workspaceId);
-        if (!workspace) {
-            throw new NotFoundError(`Workspace with id ${workspaceId} not found`);
-        }
-        const board = await this.boardRepository.findBoardByWorkspaceId(boardId, workspaceId);
-        if (!board) {
-            throw new NotFoundError(`Board with id ${boardId} not found in workspace with id ${workspaceId}`);
-        }
-        board.isActive = false;
-        await this.boardRepository.update(board.id, board);
-        await this.rbacService.onBoardDeleted(boardId);
-        return {
-            message: 'Delete board successfully!'
         }
     }
 }

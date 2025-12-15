@@ -1,6 +1,6 @@
 import redisClient from '@/config/redis.config';
 
-import { toUserResponse } from './../user/user.mapper';
+import { toUserResponse } from '../user/mapper/user.mapper';
 import { CompleteRegisterForm, PostRegisterSchema, RegisterForm, RequestOTPForm, RequestOTPResponse, VerifyOTPForm, ResetPasswordForm, ResetPasswordFormHaveLoggedIn } from './schemas/auth.schema';
 import { User } from "@/common/entities/user.entity";
 import { AuthFailureError, BadRequestError, ConflictRequestError, NotFoundError } from "@/common/handler/error.response";;

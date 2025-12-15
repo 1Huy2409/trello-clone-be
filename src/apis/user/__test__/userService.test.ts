@@ -1,4 +1,4 @@
-import { toUserResponse } from './../user.mapper';
+import { toUserResponse } from '../mapper/user.mapper';
 import UserService from "../user.service";
 import { User } from '@/common/entities/user.entity';
 import { beforeEach, describe, expect, it, vi } from "vitest";

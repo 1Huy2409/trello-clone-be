@@ -27,39 +27,10 @@ export default class BoardService {
     ) {
         this.emailService = new EmailService();
     }
-
-    // get board with visibility is public
-    getAllPublicBoards = async (): Promise<BoardResponse[]> => {
-        const boards = await this.boardRepository.findPublicBoards();
-        if (!boards.length) {
-            throw new NotFoundError('No public boards found');
-        }
-        return boards.map(toBoardResponse)
+    getAllBoardFromWorkspace = async (workspaceId: string): Promise<BoardResponse[]> => {
+        const boards = await this.boardRepository.findBoardsByWorkspaceId(workspaceId);
+        return boards.map(toBoardResponse);
     }
-    getPublicBoardById = async (id: string): Promise<BoardResponse> => {
-        const board = await this.boardRepository.findPublicBoardById(id);
-        if (!board) {
-            throw new NotFoundError(`Board with ID ${id} not found`);
-        }
-        return toBoardResponse(board);
-    }
-    delete = async (id: string): Promise<any> => {
-        return await this.boardRepository.delete(id);
-    }
-
-    reopen = async (id: string): Promise<any> => {
-        return await this.boardRepository.reopen(id);
-    }
-
-    deletePermanent = async (id: string): Promise<any> => {
-        return await this.boardRepository.deletePermanent(id);
-    }
-
-    changeOwner = async (id: string, ownerId: string): Promise<BoardResponse> => {
-        const board = await this.boardRepository.changeOwner(id, ownerId);
-        return toBoardResponse(board);
-    }
-
     createBoard = async (workspaceId: string, data: CreateBoardSchema, creatorId: string): Promise<BoardResponse> => {
         const workspace = await this.workspaceRepository.findById(workspaceId);
         if (!workspace) {
@@ -89,7 +60,6 @@ export default class BoardService {
         });
         return toBoardResponse(board);
     }
-
     updateBoard = async (id: string, data: UpdateBoardSchema): Promise<BoardResponse> => {
         const board = await this.boardRepository.findById(id);
         if (!board) {
@@ -109,6 +79,34 @@ export default class BoardService {
         board.coverUrl = data.coverUrl ?? board.coverUrl;
         board.visibility = data.visibility ?? board.visibility;
         await this.boardRepository.update(board.id, board);
+        return toBoardResponse(board);
+    }
+    delete = async (id: string): Promise<any> => {
+        return await this.boardRepository.delete(id);
+    }
+    reopen = async (id: string): Promise<any> => {
+        return await this.boardRepository.reopen(id);
+    }
+    deletePermanent = async (id: string): Promise<any> => {
+        return await this.boardRepository.deletePermanent(id);
+    }
+    changeOwner = async (id: string, ownerId: string): Promise<BoardResponse> => {
+        const board = await this.boardRepository.changeOwner(id, ownerId);
+        return toBoardResponse(board);
+    }
+    // get board with visibility is public
+    getAllPublicBoards = async (): Promise<BoardResponse[]> => {
+        const boards = await this.boardRepository.findPublicBoards();
+        if (!boards.length) {
+            throw new NotFoundError('No public boards found');
+        }
+        return boards.map(toBoardResponse)
+    }
+    getPublicBoardById = async (id: string): Promise<BoardResponse> => {
+        const board = await this.boardRepository.findPublicBoardById(id);
+        if (!board) {
+            throw new NotFoundError(`Board with ID ${id} not found`);
+        }
         return toBoardResponse(board);
     }
 

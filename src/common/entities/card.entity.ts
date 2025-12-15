@@ -15,7 +15,7 @@ export class Card extends DateTimeEntity {
     @Column({ type: 'text', nullable: true })
     description: string;
 
-    @Column({ type: 'float', default: 0 })
+    @Column({ type: 'decimal', default: 0 })
     position: number;
 
     @Column({ type: 'varchar', length: 255, nullable: true })
@@ -32,6 +32,9 @@ export class Card extends DateTimeEntity {
 
     @OneToMany(() => CardMember, (cardMember) => cardMember.card)
     cardMembers: CardMember[]
+
+    @Column({ type: 'uuid' })
+    listId: string
 
     @ManyToOne(() => List, (list) => list.cards)
     list: List
