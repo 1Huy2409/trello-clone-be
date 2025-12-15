@@ -1,10 +1,10 @@
-import { authRegistry } from "@/apis/auth/auth.router";
-import { boardRegistry } from "@/apis/board/board.router";
-import { healthCheckRegistry } from "@/apis/healthcheck/healthcheck.router";
-import { joinLinkRegistry } from "@/apis/joinlink/join-link.router";
+import { authRegistry } from "@/apis/auth/auth.openapi";
+import { boardRegistry } from "@/apis/board/board.openapi";
+import { healthCheckRegistry } from "@/apis/healthcheck/healthcheck.openapi";
+import { joinLinkRegistry } from "@/apis/joinlink/join-link.openapi";
 import { listRegistry } from "@/apis/list/list.openapi";
-import { userRegistry } from "@/apis/user/user.router";
-import { workspaceRegistry } from "@/apis/workspace/workspace.router";
+import { userRegistry } from "@/apis/user/user.openapi";
+import { workspaceRegistry } from "@/apis/workspace/workspace.openapi";
 import { OpenApiGeneratorV3, OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 
 export function generateOpenAPIDocument(): ReturnType<InstanceType<typeof OpenApiGeneratorV3>['generateDocument']> {

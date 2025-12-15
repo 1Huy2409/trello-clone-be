@@ -1,5 +1,5 @@
 import { User } from "@/common/entities/user.entity";
-import { UserResponse } from "./schemas";
+import { UserResponse } from "../schemas";
 
 export const toUserResponse = (user: User): UserResponse => ({
     id: user.id,

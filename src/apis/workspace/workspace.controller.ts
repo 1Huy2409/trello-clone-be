@@ -9,10 +9,12 @@ import { CreateBoardSchema, UpdateBoardSchema } from "../board/schemas";
 import { WorkspaceRoleService } from "./workspace-role.service";
 import { CreateWorkspaceRoleDto, UpdateWorkspaceRoleDto } from "./dto/workspace-role.dto";
 import { toWorkspaceRoleResponse } from "./mapper/workspace-role.mapper";
+import BoardService from "../board/board.service";
 
 export default class WorkspaceController {
     constructor(
         private workspaceService: WorkspaceService,
+        private boardService: BoardService,
         private workspaceRoleService: WorkspaceRoleService
     ) { }
 
@@ -172,7 +174,7 @@ export default class WorkspaceController {
         if (!id) {
             throw new BadRequestError('Workspace id is required');
         }
-        const boards = await this.workspaceService.getAllBoardFromWorkspace(id);
+        const boards = await this.boardService.getAllBoardFromWorkspace(id);
         const serviceResponse = new ServiceResponse(
             ResponseStatus.Sucess,
             'Get all boards in workspace successfully',
@@ -189,41 +191,12 @@ export default class WorkspaceController {
         }
         const ownerId = req.user?.id;
         if (!ownerId) throw new AuthFailureError('Authentication failure');
-        const newBoard = await this.workspaceService.addBoardToWorkspace(id, boardData, ownerId)
+        const newBoard = await this.boardService.createBoard(id, boardData, ownerId)
         const serviceResponse = new ServiceResponse(
             ResponseStatus.Sucess,
             'Add board into workspace successfully',
             newBoard,
             StatusCodes.CREATED
-        )
-        return handleServiceResponse(serviceResponse, res);
-    }
-    updateBoardInWorkspace = async (req: Request, res: Response) => {
-        const { id, boardId } = req.params;
-        const boardData: UpdateBoardSchema = req.body;
-        if (!id || !boardId) {
-            throw new BadRequestError('Workspace id and Board id are required');
-        }
-        const updatedBoard = await this.workspaceService.updateBoardInWorkspace(id, boardId, boardData);
-        const serviceResponse = new ServiceResponse(
-            ResponseStatus.Sucess,
-            'Update board in workspace successfully',
-            updatedBoard,
-            StatusCodes.OK
-        )
-        return handleServiceResponse(serviceResponse, res);
-    }
-    deleteBoardInWorkspace = async (req: Request, res: Response) => {
-        const { id, boardId } = req.params;
-        if (!id || !boardId) {
-            throw new BadRequestError('Workspace id and Board id are required');
-        }
-        const message = await this.workspaceService.deleteBoardInWorkspace(id, boardId);
-        const serviceResponse = new ServiceResponse(
-            ResponseStatus.Sucess,
-            'Delete board in workspace successfully',
-            message,
-            StatusCodes.OK
         )
         return handleServiceResponse(serviceResponse, res);
     }

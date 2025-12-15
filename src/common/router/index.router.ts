@@ -39,9 +39,7 @@ import { PermissionRepository } from '@/apis/permission/repositories/permission.
 import { RolePermissionRepository } from '@/apis/role-permission/repositories/role-permission.repository'
 import { RolePermission } from '../entities/role-permission.entity'
 import { WorkspaceRoleService } from '@/apis/workspace/workspace-role.service'
-import { RbacCacheService } from '../rbac/rbac.cache.service'
 import { RbacService } from '../rbac/rbac.service'
-import listService from '@/apis/list/list.service'
 import { List } from '../entities/list.entity'
 import { Card } from '../entities/card.entity';
 import { CardRepository } from '@/apis/card/repositories/card.repository';
@@ -50,10 +48,17 @@ import { ListRepository } from '@/apis/list/repositories/list.repository'
 import ListController from '@/apis/list/list.controller'
 import listRouter from '@/apis/list/list.router'
 import { registerListPaths } from '@/apis/list/list.openapi'
+import { registerAuthPaths } from '@/apis/auth/auth.openapi'
+import { registerUserPaths } from '@/apis/user/user.openapi'
+import { registerWorkspacePaths } from '@/apis/workspace/workspace.openapi'
+import { registerJoinLinkPaths } from '@/apis/joinlink/join-link.openapi'
+import { registerBoardPaths } from '@/apis/board/board.openapi'
+import { registerHealthCheckPaths } from '@/apis/healthcheck/healthcheck.openapi'
 
 const mainRouter: Router = express.Router()
 const initHealthCheckModule = () => {
     const healthCheckController = new HealthCheckController();
+    registerHealthCheckPaths();
     mainRouter.use('/health-check', healthCheckRouter(healthCheckController))
 }
 const initUserModule = () => {
@@ -61,13 +66,14 @@ const initUserModule = () => {
     const userRepository = new UserRepository(userOrmRepo)
     const userService = new UserService(userRepository);
     const userController = new UserController(userService);
-
+    registerUserPaths();
     mainRouter.use('/users', userRouter(userController));
 }
 // need fixing
 const initAuthModule = () => {
     const userOrmRepo = AppDataSource.getRepository(User);
     const userRepository = new UserRepository(userOrmRepo);
+    registerAuthPaths();
     const authService = new AuthService(userRepository);
     const authController = new AuthController(authService);
     mainRouter.use('/auth', authRouter(authController))
@@ -86,11 +92,19 @@ const initWorkspaceModule = () => {
     const permissionRepository = new PermissionRepository(permissionOrmRepo);
     const rolePermissionOrmRepo = AppDataSource.getRepository(RolePermission);
     const rolePermissionRepository = new RolePermissionRepository(rolePermissionOrmRepo);
+    const boardJoinLinkOrmRepo = AppDataSource.getRepository(BoardJoinLink);
+    const boardJoinLinkRepository = new BoardJoinLinkRepository(boardJoinLinkOrmRepo);
+    const boardMemberOrmRepo = AppDataSource.getRepository(BoardMember);
+    const boardMemberRepository = new BoardMemberRepository(boardMemberOrmRepo);
+    const userOrmRepo = AppDataSource.getRepository(User);
+    const userRepository = new UserRepository(userOrmRepo);
     const rbacService = new RbacService();
     const workspaceService = new WorkspaceService(workspaceRepository, workspaceMemberRepository, boardRepository, roleRepository, rbacService);
     const workspaceRoleService = new WorkspaceRoleService(roleRepository, permissionRepository, rolePermissionRepository, rbacService);
-    const workspaceController = new WorkspaceController(workspaceService, workspaceRoleService);
+    const boardService = new BoardService(boardRepository, workspaceRepository, boardJoinLinkRepository, boardMemberRepository, roleRepository, userRepository);
+    const workspaceController = new WorkspaceController(workspaceService, boardService, workspaceRoleService);
 
+    registerWorkspacePaths();
     mainRouter.use('/workspaces', workspaceRouter(workspaceController));
 }
 const initJoinLinkModule = () => {
@@ -106,6 +120,7 @@ const initJoinLinkModule = () => {
     const joinLinkService = new JoinLinkService(joinLinkRepository, workspaceRepository, workspaceMemberRepository, roleRepository, rbacService);
     const joinLinkController = new JoinLinkController(joinLinkService);
 
+    registerJoinLinkPaths();
     mainRouter.use('/workspaces', joinLinkRouter(joinLinkController))
 }
 const initBoardModule = () => {
@@ -140,7 +155,7 @@ const initBoardModule = () => {
         AppDataSource
     )
     const boardController = new BoardController(boardService, listService);
-
+    registerBoardPaths();
     mainRouter.use('/boards', boardRouter(boardController))
 }
 const initListModule = () => {

@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { PatchUserProfileRequest, UserResponse } from "./schemas";
 import { User } from "@/common/entities/user.entity";
 import { BadRequestError, NotFoundError } from "@/common/handler/error.response";
-import { toUserResponse } from "./user.mapper";
+import { toUserResponse } from "./mapper/user.mapper";
 import { IUserRepository } from "./repositories/user.repository.interface";
 import { uploadImageBuffer } from "@/common/services/cloudinary.service";
 

@@ -6,5 +6,7 @@ export const toListResponse = (list: List): ListResponse => {
         id: list.id,
         title: list.title,
         position: list.position,
+        isArchived: list.isArchived,
+        boardId: list.boardId,
     }
 }

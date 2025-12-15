@@ -56,11 +56,11 @@ export default class BoardController {
         return handleServiceResponse(serviceResponse, res);
     }
     deleteBoard = async (req: Request, res: Response) => {
-        const { id } = req.params;
-        if (!id) {
+        const { boardId } = req.params;
+        if (!boardId) {
             throw new BadRequestError('Board id is required')
         }
-        await this.boardService.delete(id);
+        await this.boardService.delete(boardId);
         const serviceResponse = new ServiceResponse(
             ResponseStatus.Sucess,
             'Delete board successfully',
@@ -112,12 +112,12 @@ export default class BoardController {
     }
 
     updateBoard = async (req: Request, res: Response) => {
-        const { id } = req.params;
-        if (!id) {
-            throw new BadRequestError('Board id is required')
+        const { boardId } = req.params;
+        if (!boardId) {
+            throw new BadRequestError(`Board ${boardId} is required`)
         }
         const data: UpdateBoardSchema = req.body;
-        const board = await this.boardService.updateBoard(id, data);
+        const board = await this.boardService.updateBoard(boardId, data);
         const serviceResponse = new ServiceResponse(
             ResponseStatus.Sucess,
             'Update board successfully',
