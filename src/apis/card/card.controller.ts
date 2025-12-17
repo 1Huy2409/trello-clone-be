@@ -86,4 +86,49 @@ export default class CardController {
         )
         return handleServiceResponse(serviceResponse, res);
     }
+    assignMemberToCard = async (req: Request, res: Response) => {
+        const cardId = req.params.id || req.params.cardId;
+        const userId = req.body.userId;
+        if (!cardId || !userId) {
+            throw new BadRequestError('Card ID and User ID are required');
+        }
+        const assignedCardMember = await this.cardService.assignMemberToCard(cardId, userId);
+        const serviceResponse = new ServiceResponse(
+            ResponseStatus.Sucess,
+            'Assign member to card successfully',
+            assignedCardMember,
+            StatusCodes.OK
+        )
+        return handleServiceResponse(serviceResponse, res);
+    }
+    removeMemberFromCard = async (req: Request, res: Response) => {
+        const cardId = req.params.id || req.params.cardId;
+        const userId = req.body.userId;
+        if (!cardId || !userId) {
+            throw new BadRequestError('Card ID and User ID are required');
+        }
+        const removedCardMember = await this.cardService.removeMemberFromCard(cardId, userId);
+        const serviceResponse = new ServiceResponse(
+            ResponseStatus.Sucess,
+            'Remove member from card successfully',
+            removedCardMember,
+            StatusCodes.OK
+        )
+        return handleServiceResponse(serviceResponse, res);
+    }
+
+    getCardMembers = async (req: Request, res: Response) => {
+        const cardId = req.params.id || req.params.cardId;
+        if (!cardId) {
+            throw new BadRequestError('Card ID is required');
+        }
+        const cardMembers = await this.cardService.getCardMembers(cardId);
+        const serviceResponse = new ServiceResponse(
+            ResponseStatus.Sucess,
+            'Get card members successfully',
+            cardMembers,
+            StatusCodes.OK
+        )
+        return handleServiceResponse(serviceResponse, res);
+    }
 }

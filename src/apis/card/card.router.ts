@@ -8,6 +8,21 @@ import { PERMISSIONS } from "@/common/constants/permissions";
 export default function cardRouter(cardController: CardController): Router {
     const router = Router();
 
+    router.get('/:id/members',
+        asyncHandler(checkAuthentication),
+        asyncHandler(checkCardPermission(PERMISSIONS.CARD_VIEW)),
+        asyncHandler(cardController.getCardMembers)
+    )
+    router.post('/:id/members',
+        asyncHandler(checkAuthentication),
+        asyncHandler(checkCardPermission(PERMISSIONS.CARD_UPDATE)),
+        asyncHandler(cardController.assignMemberToCard)
+    )
+    router.delete('/:id/members',
+        asyncHandler(checkAuthentication),
+        asyncHandler(checkCardPermission(PERMISSIONS.CARD_UPDATE)),
+        asyncHandler(cardController.removeMemberFromCard)
+    )
     router.patch('/move',
         asyncHandler(checkAuthentication),
         asyncHandler(checkCrossCardPermission(PERMISSIONS.CARD_UPDATE, PERMISSIONS.CARD_CREATE)),

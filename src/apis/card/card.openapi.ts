@@ -3,11 +3,54 @@ import { CardResponseSchema } from "./schemas/card/card.response.schema";
 import { CopyCardRequest, MoveCardRequest, MoveCardSchema, ReorderCardRequest, UpdateCardRequest } from "./schemas/card/card.request.schema";
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilder";
 import z from "zod";
+import { CardMemberResponseSchema } from "./schemas/card-member/card-member.response.schema";
+import { AssignMemberToCardRequest, RemoveMemberFromCardRequest } from "./schemas/card-member/card-member.request.schema";
 
 export const cardRegistry = new OpenAPIRegistry();
 cardRegistry.register('Card', CardResponseSchema);
 
 export function registerCardPaths() {
+    cardRegistry.registerPath({
+        method: 'get',
+        path: '/api/v1/cards/{id}/members',
+        tags: ['Card'],
+        security: [{ bearerAuth: [] }],
+        summary: 'Get members of a card',
+        request: {
+            params: z.object({
+                id: z.uuid().openapi({ description: 'ID of the card', example: 'a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6' })
+            })
+        },
+        responses: createApiResponse(z.array(CardMemberResponseSchema), 'Success')
+    })
+    cardRegistry.registerPath({
+        method: 'post',
+        path: '/api/v1/cards/{id}/members',
+        tags: ['Card'],
+        security: [{ bearerAuth: [] }],
+        summary: 'Assign a member to a card',
+        request: {
+            body: AssignMemberToCardRequest,
+            params: z.object({
+                id: z.uuid().openapi({ description: 'ID of the card', example: 'a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6' })
+            }),
+        },
+        responses: createApiResponse(CardMemberResponseSchema, 'Success')
+    })
+    cardRegistry.registerPath({
+        method: 'delete',
+        path: '/api/v1/cards/{id}/members',
+        tags: ['Card'],
+        security: [{ bearerAuth: [] }],
+        summary: 'Remove a member from a card',
+        request: {
+            body: RemoveMemberFromCardRequest,
+            params: z.object({
+                id: z.uuid().openapi({ description: 'ID of the card', example: 'a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6' })
+            })
+        },
+        responses: createApiResponse(CardMemberResponseSchema, 'Success')
+    })
     cardRegistry.registerPath({
         method: 'get',
         path: '/api/v1/lists/{listId}/cards',

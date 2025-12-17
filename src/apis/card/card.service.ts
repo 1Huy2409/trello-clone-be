@@ -7,11 +7,19 @@ import { NotFoundError } from '@/common/handler/error.response';
 import { DataSource, EntityManager } from 'typeorm';
 import { calculateNewPosition, POSITION_INCREMENT } from '@/common/utils/positionCalculator';
 import { IBoardRepository } from '../board/repositories/board.repository.interface';
+import { CardMemberResponse } from './schemas/card-member/card-member.response.schema';
+import { IUserRepository } from '../user/repositories/user.repository.interface';
+import { ICardMemberRepository } from './repositories/card-member.repository.interface';
+import { IBoardMemberRepository } from '../board/repositories/board-member.repository.interface';
+import { toCardMemberResponse } from './mapper/card-member.mapper';
 export default class CardService {
     constructor(
         private cardRepository: ICardRepository,
         private listRepository: IListRepository,
         private boardRepository: IBoardRepository,
+        private userRepository: IUserRepository,
+        private boardMemberRepository: IBoardMemberRepository,
+        private cardMemberRepository: ICardMemberRepository,
         private dataSource: DataSource
     ) { }
 
@@ -162,5 +170,43 @@ export default class CardService {
             const reorderedCard = await this.cardRepository.update(cardId, cardToReorder, manager);
             return toCardResponse(reorderedCard);
         })
+    }
+
+    assignMemberToCard = async (cardId: string, memberId: string): Promise<CardMemberResponse> => {
+        const card = await this.cardRepository.getActiveCardById(cardId);
+        if (!card) {
+            throw new NotFoundError(`Card with ID ${cardId} not found`);
+        }
+        const user = await this.userRepository.findById(memberId);
+        if (!user) {
+            throw new NotFoundError(`User with ID ${memberId} not found`);
+        }
+        const boardMember = await this.boardMemberRepository.findByBoardAndUserId(card.boardId, memberId);
+        if (!boardMember) {
+            throw new NotFoundError(`User with ID ${memberId} is not a member of the board`);
+        }
+        const existingCardMember = await this.cardMemberRepository.findByCardAndMemberId(cardId, memberId);
+        if (existingCardMember) {
+            return toCardMemberResponse(existingCardMember);
+        }
+        const cardMember = await this.cardMemberRepository.addCardMember(cardId, memberId);
+        return toCardMemberResponse(cardMember);
+    }
+
+    removeMemberFromCard = async (cardId: string, memberId: string): Promise<void> => {
+        const card = await this.cardRepository.getActiveCardById(cardId);
+        if (!card) {
+            throw new NotFoundError(`Card with ID ${cardId} not found`);
+        }
+        const cardMember = await this.cardMemberRepository.findByCardAndMemberId(cardId, memberId);
+        if (!cardMember) {
+            throw new NotFoundError(`Card member with Card ID ${cardId} and Member ID ${memberId} not found`);
+        }
+        await this.cardMemberRepository.removeCardMember(cardMember.id);
+    }
+
+    getCardMembers = async (cardId: string): Promise<CardMemberResponse[]> => {
+        const cardMembers = await this.cardMemberRepository.findAllCardMembersByCardId(cardId);
+        return cardMembers.map(member => toCardMemberResponse(member));
     }
 }
