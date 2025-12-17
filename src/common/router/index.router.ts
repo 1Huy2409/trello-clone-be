@@ -54,6 +54,10 @@ import { registerWorkspacePaths } from '@/apis/workspace/workspace.openapi'
 import { registerJoinLinkPaths } from '@/apis/joinlink/join-link.openapi'
 import { registerBoardPaths } from '@/apis/board/board.openapi'
 import { registerHealthCheckPaths } from '@/apis/healthcheck/healthcheck.openapi'
+import CardService from '@/apis/card/card.service'
+import CardController from '@/apis/card/card.controller'
+import { registerCardPaths } from '@/apis/card/card.openapi'
+import cardRouter from '@/apis/card/card.router'
 
 const mainRouter: Router = express.Router()
 const initHealthCheckModule = () => {
@@ -171,9 +175,23 @@ const initListModule = () => {
         cardRepository,
         AppDataSource
     )
+    const cardService = new CardService(cardRepository, listRepository, boardRepository, AppDataSource)
     registerListPaths();
-    const listController = new ListController(listService);
+    const listController = new ListController(listService, cardService);
     mainRouter.use('/lists', listRouter(listController))
+}
+const initCardModule = () => {
+    const listOrmRepo = AppDataSource.getRepository(List);
+    const listRepository = new ListRepository(listOrmRepo);
+    const boardOrmRepo = AppDataSource.getRepository(Board);
+    const boardRepository = new BoardRepository(boardOrmRepo);
+    const cardOrmRepo = AppDataSource.getRepository(Card);
+    const cardRepository = new CardRepository(cardOrmRepo);
+    const cardService = new CardService(cardRepository, listRepository, boardRepository, AppDataSource)
+    const cardController = new CardController(cardService);
+    registerCardPaths();
+
+    mainRouter.use('/cards', cardRouter(cardController))
 }
 initHealthCheckModule();
 initAuthModule();
@@ -182,4 +200,5 @@ initWorkspaceModule();
 initJoinLinkModule();
 initBoardModule();
 initListModule();
+initCardModule();
 export default mainRouter;
