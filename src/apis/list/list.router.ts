@@ -37,5 +37,16 @@ export default function listRouter(listController: ListController): Router {
         asyncHandler(checkListPermission(PERMISSIONS.LIST_DELETE)),
         asyncHandler(listController.reopenList)
     )
+
+    router.post('/:listId/cards',
+        asyncHandler(checkAuthentication),
+        asyncHandler(checkListPermission(PERMISSIONS.CARD_CREATE)),
+        asyncHandler(listController.createCard)
+    )
+    router.get('/:listId/cards',
+        asyncHandler(checkAuthentication),
+        asyncHandler(checkListPermission(PERMISSIONS.CARD_VIEW)),
+        asyncHandler(listController.getCardsByListId)
+    )
     return router;
 } 

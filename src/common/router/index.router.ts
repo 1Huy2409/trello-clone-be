@@ -54,6 +54,12 @@ import { registerWorkspacePaths } from '@/apis/workspace/workspace.openapi'
 import { registerJoinLinkPaths } from '@/apis/joinlink/join-link.openapi'
 import { registerBoardPaths } from '@/apis/board/board.openapi'
 import { registerHealthCheckPaths } from '@/apis/healthcheck/healthcheck.openapi'
+import CardService from '@/apis/card/card.service'
+import CardController from '@/apis/card/card.controller'
+import { registerCardPaths } from '@/apis/card/card.openapi'
+import cardRouter from '@/apis/card/card.router'
+import { CardMember } from '../entities/card-member.entity'
+import { CardMemberRepository } from '@/apis/card/repositories/card-member.repository'
 
 const mainRouter: Router = express.Router()
 const initHealthCheckModule = () => {
@@ -165,15 +171,41 @@ const initListModule = () => {
     const boardRepository = new BoardRepository(boardOrmRepo);
     const cardOrmRepo = AppDataSource.getRepository(Card);
     const cardRepository = new CardRepository(cardOrmRepo);
+    const userOrmRepo = AppDataSource.getRepository(User);
+    const userRepository = new UserRepository(userOrmRepo);
+    const boardMemberOrmRepo = AppDataSource.getRepository(BoardMember);
+    const boardMemberRepository = new BoardMemberRepository(boardMemberOrmRepo);
+    const cardMemberOrmRepo = AppDataSource.getRepository(CardMember);
+    const cardMemberRepository = new CardMemberRepository(cardMemberOrmRepo);
     const listService = new ListService(
         listRepository,
         boardRepository,
         cardRepository,
         AppDataSource
     )
+    const cardService = new CardService(cardRepository, listRepository, boardRepository, userRepository, boardMemberRepository, cardMemberRepository, AppDataSource)
     registerListPaths();
-    const listController = new ListController(listService);
+    const listController = new ListController(listService, cardService);
     mainRouter.use('/lists', listRouter(listController))
+}
+const initCardModule = () => {
+    const listOrmRepo = AppDataSource.getRepository(List);
+    const listRepository = new ListRepository(listOrmRepo);
+    const boardOrmRepo = AppDataSource.getRepository(Board);
+    const boardRepository = new BoardRepository(boardOrmRepo);
+    const cardOrmRepo = AppDataSource.getRepository(Card);
+    const cardRepository = new CardRepository(cardOrmRepo);
+    const userOrmRepo = AppDataSource.getRepository(User);
+    const userRepository = new UserRepository(userOrmRepo);
+    const boardMemberOrmRepo = AppDataSource.getRepository(BoardMember);
+    const boardMemberRepository = new BoardMemberRepository(boardMemberOrmRepo);
+    const cardMemberOrmRepo = AppDataSource.getRepository(CardMember);
+    const cardMemberRepository = new CardMemberRepository(cardMemberOrmRepo);
+    const cardService = new CardService(cardRepository, listRepository, boardRepository, userRepository, boardMemberRepository, cardMemberRepository, AppDataSource)
+    const cardController = new CardController(cardService);
+    registerCardPaths();
+
+    mainRouter.use('/cards', cardRouter(cardController))
 }
 initHealthCheckModule();
 initAuthModule();
@@ -182,4 +214,5 @@ initWorkspaceModule();
 initJoinLinkModule();
 initBoardModule();
 initListModule();
+initCardModule();
 export default mainRouter;

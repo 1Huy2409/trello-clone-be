@@ -1,5 +1,6 @@
 import { authRegistry } from "@/apis/auth/auth.openapi";
 import { boardRegistry } from "@/apis/board/board.openapi";
+import { cardRegistry } from "@/apis/card/card.openapi";
 import { healthCheckRegistry } from "@/apis/healthcheck/healthcheck.openapi";
 import { joinLinkRegistry } from "@/apis/joinlink/join-link.openapi";
 import { listRegistry } from "@/apis/list/list.openapi";
@@ -8,7 +9,7 @@ import { workspaceRegistry } from "@/apis/workspace/workspace.openapi";
 import { OpenApiGeneratorV3, OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 
 export function generateOpenAPIDocument(): ReturnType<InstanceType<typeof OpenApiGeneratorV3>['generateDocument']> {
-    const registry = new OpenAPIRegistry([userRegistry, healthCheckRegistry, authRegistry, workspaceRegistry, boardRegistry, joinLinkRegistry, listRegistry])
+    const registry = new OpenAPIRegistry([userRegistry, healthCheckRegistry, authRegistry, workspaceRegistry, boardRegistry, joinLinkRegistry, listRegistry, cardRegistry])
     registry.registerComponent('securitySchemes', 'bearerAuth', {
         type: 'http',
         scheme: 'bearer',

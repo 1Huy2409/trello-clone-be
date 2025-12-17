@@ -6,8 +6,11 @@ import { ListRepository } from "@/apis/list/repositories/list.repository";
 import { IListRepository } from "@/apis/list/repositories/list.repository.interface";
 import { AppDataSource } from "@/config/db.config";
 import { List } from "../entities/list.entity";
+import { CardRepository } from "@/apis/card/repositories/card.repository";
+import { Card } from "../entities/card.entity";
 const authorizationHelper = new AuthorizationHelper();
 const listRepository = new ListRepository(AppDataSource.getRepository(List));
+const cardRepository = new CardRepository(AppDataSource.getRepository(Card));
 export const checkWorkspacePermission = (requiredPermission: PermissionKey) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -136,6 +139,84 @@ export const checkCrossListPermission = (
         }
         catch (error) {
             console.error('Error in checkCrossListPermission middleware:', error);
+            next(error)
+        }
+    }
+}
+export const checkCardPermission = (requiredPermission: PermissionKey) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const userId = req.user?.id
+            if (!userId) {
+                throw new AuthFailureError('User not authenticated', 401);
+            }
+            const cardId = req.params.cardId || req.params.id || req.body.cardId;
+            if (!cardId) {
+                throw new BadRequestError('Card ID is required');
+            }
+            const card = await cardRepository.getCardById(cardId);
+            if (!card) {
+                throw new BadRequestError(`Card with ID ${cardId} not found`);
+            }
+            const boardId = card.boardId;
+            const hasPermission = await authorizationHelper.canAccessBoard(
+                userId,
+                boardId,
+                requiredPermission
+            )
+            if (!hasPermission) {
+                throw new ForbiddenError('You do not have permission to access this board');
+            }
+            next();
+        }
+        catch (error) {
+            console.error('Error in checkCardPermission middleware:', error);
+            next(error)
+        }
+    }
+}
+export const checkCrossCardPermission = (
+    sourcePermission: PermissionKey,
+    targetPermission: PermissionKey
+) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const userId = req.user?.id
+            if (!userId) {
+                throw new AuthFailureError('User not authenticated', 401);
+            }
+            const { cardId, targetBoardId } = req.body;
+            if (!cardId) {
+                throw new BadRequestError('Source Card ID is required');
+            }
+            if (!targetBoardId) {
+                throw new BadRequestError('Target Board ID is required');
+            }
+            const card = await cardRepository.getCardById(cardId);
+            if (!card) {
+                throw new BadRequestError(`Card with ID ${cardId} not found`);
+            }
+            const sourceBoardId = card.boardId;
+            const hasSourcePermission = await authorizationHelper.canAccessBoard(
+                userId,
+                sourceBoardId,
+                sourcePermission
+            )
+            if (!hasSourcePermission) {
+                throw new ForbiddenError('You do not have permission to access the source board');
+            }
+            const hasTargetPermission = await authorizationHelper.canAccessBoard(
+                userId,
+                targetBoardId,
+                targetPermission
+            )
+            if (!hasTargetPermission) {
+                throw new ForbiddenError('You do not have permission to access the target board');
+            }
+            next();
+        }
+        catch (error) {
+            console.error('Error in checkCrossCardPermission middleware:', error);
             next(error)
         }
     }

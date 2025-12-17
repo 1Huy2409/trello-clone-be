@@ -94,6 +94,9 @@ export default class ListService {
                 afterList?.position ?? null
             );
             listToMove.boardId = targetBoardId;
+            listToMove.cards.forEach(card => {
+                card.boardId = targetBoardId;
+            });
             listToMove.position = newPosition;
             const movedList = await this.listRepository.update(listId, listToMove);
             return toListResponse(movedList);
@@ -129,7 +132,8 @@ export default class ListService {
                 const { id, ...cardData } = card;
                 await this.cardRepository.create({
                     ...cardData,
-                    listId: copiedList.id
+                    listId: copiedList.id,
+                    boardId: copiedList.boardId
                 }, manager);
             }
             return toListResponse(copiedList);
