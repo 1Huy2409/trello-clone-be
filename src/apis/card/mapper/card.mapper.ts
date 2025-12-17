@@ -12,7 +12,7 @@ export const toCardResponse = (card: Card): CardResponse => {
         coverUrl: card.coverUrl,
         priority: card.priority,
         dueDate: new Date(card.dueDate).toISOString(),
-        cardMembers: card.cardMembers.map(member => toCardMemberResponse(member)),
+        cardMembers: card.cardMembers?.map(member => toCardMemberResponse(member)),
         listId: card.listId,
         boardId: card.boardId,
     }
