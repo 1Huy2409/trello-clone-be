@@ -207,6 +207,9 @@ const initCardModule = () => {
 
     mainRouter.use('/cards', cardRouter(cardController))
 }
+const initActivityModule = () => {
+
+}
 initHealthCheckModule();
 initAuthModule();
 initUserModule();
