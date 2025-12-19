@@ -6,6 +6,7 @@
   "scripts": {
     "start": "tsx watch src/index.ts",
     "dev": "tsx watch src/index.ts",
+    "worker": "tsx watch src/workers/email.worker.ts",
     "test": "vitest run",
     "test:ui": "vitest --ui",
     "test:dev": "vitest dev",
