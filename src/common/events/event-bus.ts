@@ -5,7 +5,7 @@ type EventHandler = (event: DomainEvent) => Promise<void> | void;
 
 export class EventBus {
     private static handlers: EventHandler[] = [];
-    private static subscribed: boolean = false;
+    private static isSubscribed: boolean = false;
     private static instance: EventBus;
     private constructor() { }
 
@@ -19,14 +19,16 @@ export class EventBus {
         await redisPublisher.publish('board.events', JSON.stringify(event));
     }
     static async subscribe(handler: EventHandler) {
-        await this.handlers.push(handler);
-        await redisSubscriber.subscribe('board.events');
-        redisSubscriber.on('message', async (channel, message) => {
-            const event = JSON.parse(message) as DomainEvent;
-            for (const h of this.handlers) {
-                await h(event);
-            }
-        });
-        this.subscribed = true;
+        this.handlers.push(handler);
+        if (!this.isSubscribed) {
+            await redisSubscriber.subscribe('board.events');
+            redisSubscriber.on('message', async (channel, message) => {
+                const event = JSON.parse(message) as DomainEvent;
+                for (const h of this.handlers) {
+                    await h(event);
+                }
+            });
+            this.isSubscribed = true;
+        }
     }
 }

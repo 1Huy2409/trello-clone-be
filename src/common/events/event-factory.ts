@@ -1,7 +1,7 @@
-import { uuid } from "zod";
+import { randomUUID } from "crypto";
 
 export const createBaseEvent = (actorId: string) => ({
-    eventId: uuid(),
+    eventId: randomUUID(),
     occuredAt: new Date().toISOString(),
     actorId
 })

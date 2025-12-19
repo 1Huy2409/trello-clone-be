@@ -60,6 +60,9 @@ import { registerCardPaths } from '@/apis/card/card.openapi'
 import cardRouter from '@/apis/card/card.router'
 import { CardMember } from '../entities/card-member.entity'
 import { CardMemberRepository } from '@/apis/card/repositories/card-member.repository'
+import { Activity } from '../entities/activity.entity'
+import { ActivityRepository } from '@/apis/activity/repositories/activity.repository'
+import { ActivitySubscriber } from '@/apis/activity/activity.subscriber'
 
 const mainRouter: Router = express.Router()
 const initHealthCheckModule = () => {
@@ -208,7 +211,10 @@ const initCardModule = () => {
     mainRouter.use('/cards', cardRouter(cardController))
 }
 const initActivityModule = () => {
-
+    const activityOrmRepo = AppDataSource.getRepository(Activity);
+    const activityRepository = new ActivityRepository(activityOrmRepo);
+    const activitySubscriber = new ActivitySubscriber(activityRepository);
+    activitySubscriber.init();
 }
 initHealthCheckModule();
 initAuthModule();
@@ -218,4 +224,5 @@ initJoinLinkModule();
 initBoardModule();
 initListModule();
 initCardModule();
+initActivityModule();
 export default mainRouter;

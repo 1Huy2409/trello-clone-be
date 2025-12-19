@@ -12,6 +12,9 @@ import { IUserRepository } from '../user/repositories/user.repository.interface'
 import { ICardMemberRepository } from './repositories/card-member.repository.interface';
 import { IBoardMemberRepository } from '../board/repositories/board-member.repository.interface';
 import { toCardMemberResponse } from './mapper/card-member.mapper';
+import { EventBus } from '@/common/events/event-bus';
+import { createBaseEvent } from '@/common/events/event-factory';
+import { EventType } from '@/common/events/interface';
 export default class CardService {
     constructor(
         private cardRepository: ICardRepository,
@@ -22,7 +25,6 @@ export default class CardService {
         private cardMemberRepository: ICardMemberRepository,
         private dataSource: DataSource
     ) { }
-
     createCard = async (data: CreateCardSchema, listId: string) => {
         const list = await this.listRepository.findById(listId);
         if (!list) {
@@ -88,13 +90,13 @@ export default class CardService {
     }
 
     // advanced operations
-    moveCard = async (moveData: MoveCardSchema): Promise<CardResponse> => {
+    moveCard = async (moveData: MoveCardSchema, userId: string): Promise<CardResponse> => {
         const { cardId, targetBoardId, targetListId, beforeCardId, afterCardId } = moveData;
-        return await this.dataSource.transaction(async (manager: EntityManager) => {
-            const cardToMove = await this.cardRepository.getActiveCardById(cardId);
-            if (!cardToMove) {
-                throw new NotFoundError(`Card with ID ${cardId} not found`);
-            }
+        const cardToMove = await this.cardRepository.getActiveCardById(cardId);
+        if (!cardToMove) {
+            throw new NotFoundError(`Card with ID ${cardId} not found`);
+        }
+        const card = await this.dataSource.transaction(async (manager: EntityManager) => {
             const targetBoard = await this.boardRepository.findById(targetBoardId);
             if (!targetBoard) {
                 throw new NotFoundError(`Target board with ID ${targetBoardId} not found`);
@@ -115,6 +117,22 @@ export default class CardService {
             const movedCard = await this.cardRepository.update(cardId, cardToMove, manager);
             return toCardResponse(movedCard);
         })
+        // call publish event
+        await EventBus.publish({
+            ...createBaseEvent(userId),
+            boardId: cardToMove.boardId,
+            cardId: cardId,
+            type: EventType.CARD_MOVED,
+            payload: {
+                fromBoardId: cardToMove.boardId,
+                toBoardId: targetBoardId,
+                fromListId: cardToMove.listId,
+                toListId: targetListId,
+                fromPosition: cardToMove.position,
+                toPosition: card.position,
+            }
+        })
+        return card;
     }
     copyCard = async (copyData: CopyCardSchema): Promise<CardResponse> => {
         const { cardId, title, targetBoardId, targetListId, beforeCardId, afterCardId } = copyData;

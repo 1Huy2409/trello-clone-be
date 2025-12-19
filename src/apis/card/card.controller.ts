@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import CardService from "./card.service";
 import { CopyCardSchema, MoveCardSchema, ReorderCardSchema, UpdateCardSchema } from "./schemas/card/card.request.schema";
-import { BadRequestError } from "@/common/handler/error.response";
+import { AuthFailureError, BadRequestError } from "@/common/handler/error.response";
 import { ResponseStatus, ServiceResponse } from "@/common/models/service.response";
 import { StatusCodes } from "http-status-codes";
 import { handleServiceResponse } from "@/common/utils/httpHandler";
@@ -54,8 +54,12 @@ export default class CardController {
     }
 
     moveCard = async (req: Request, res: Response) => {
+        const userId = req.user?.id;
+        if (!userId) {
+            throw new AuthFailureError('User not authenticated');
+        }
         const moveData: MoveCardSchema = req.body;
-        const movedCard = await this.cardService.moveCard(moveData);
+        const movedCard = await this.cardService.moveCard(moveData, userId);
         const serviceResponse = new ServiceResponse(
             ResponseStatus.Sucess,
             'Move card successfully',

@@ -24,6 +24,9 @@ export class Activity extends DateTimeEntity {
     type: EventType;
 
     @Column({ type: 'jsonb', nullable: true })
+    message: Record<string, any> | null;
+
+    @Column({ type: 'jsonb', nullable: true })
     payload: Record<string, any> | null;
 
     @ManyToOne(() => User)
