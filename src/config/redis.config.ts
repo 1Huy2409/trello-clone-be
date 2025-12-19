@@ -14,7 +14,7 @@ redisCache.on("connect", () => {
 redisCache.on("error", (err) => {
     console.error("Redis connection error:", err);
 });
-
+export const redisStream = new Redis(redisConfig);
 export const redisSubscriber = new Redis(redisConfig);
 export const redisPublisher = new Redis(redisConfig);
 [redisPublisher, redisSubscriber].forEach((client, index) => {

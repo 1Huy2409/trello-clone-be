@@ -1,4 +1,4 @@
-import { redisCache } from '@/config/redis.config';
+import { redisCache, redisStream } from '@/config/redis.config';
 
 import { toUserResponse } from '../user/mapper/user.mapper';
 import { CompleteRegisterForm, PostRegisterSchema, RegisterForm, RequestOTPForm, RequestOTPResponse, VerifyOTPForm, ResetPasswordForm, ResetPasswordFormHaveLoggedIn } from './schemas/auth.schema';
@@ -13,6 +13,7 @@ import { EmailService } from '@/common/utils/mailService';
 
 import { IUserRepository } from '../user/repositories/user.repository.interface';
 import { OtpService } from '@/common/utils/otpService';
+import { EMAIL_STREAM } from '@/common/constants/redis';
 interface OtpRedisData {
     otp: string;
     isVerified: boolean;
@@ -66,10 +67,10 @@ export default class AuthService {
             email,
             password: await hashPassword(password),
         })
-        // always generate and send OTP
+        // pass message to redis streaming service
         const otp = this.otpService.generateOTP();
         await this.otpService.saveOTP(email, otp);
-        await this.emailService.sendOTP(email, otp);
+        await redisStream.xadd(EMAIL_STREAM, '*', 'type', 'send_otp', 'email', email, 'otp', otp);
         return {
             email,
             message: 'OTP has been sent to your email address.'

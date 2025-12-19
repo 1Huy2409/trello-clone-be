@@ -1,11 +1,10 @@
-import { signRefreshToken } from './../../common/utils/auth.util';
 import { Request, Response } from "express";
 import AuthService from "./auth.service";
 import { handleServiceResponse } from "@/common/utils/httpHandler";
 import { ResponseStatus, ServiceResponse } from "@/common/models/service.response";
 import { StatusCodes } from "http-status-codes";
 import { User } from "@/common/entities/user.entity";
-import { CompleteRegisterForm, RegisterForm, RequestOTPForm, VerifyOTPForm, ResetPasswordForm, ResetPasswordFormHaveLoggedIn } from "./schemas/auth.schema";
+import { RegisterForm, RequestOTPForm, VerifyOTPForm, ResetPasswordForm, ResetPasswordFormHaveLoggedIn } from "./schemas/auth.schema";
 import { AuthFailureError } from '@/common/handler/error.response';
 
 export default class AuthController {
