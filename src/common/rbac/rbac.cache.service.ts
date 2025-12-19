@@ -1,5 +1,4 @@
-import redis from "@/config/redis.config";
-import { ca } from "zod/v4/locales";
+import { redisCache } from "@/config/redis.config";
 import { Membership } from "./types";
 export class RbacCacheService {
     private readonly TTL = {
@@ -19,7 +18,7 @@ export class RbacCacheService {
     ): Promise<void> => {
         try {
             const key = this.buildPermissionKey(userId, permission, context);
-            await redis.setex(key, this.TTL.DECISION, result ? "1" : "0");
+            await redisCache.setex(key, this.TTL.DECISION, result ? "1" : "0");
         }
         catch (err) {
             console.error("Error caching permission check:", err);
@@ -32,7 +31,7 @@ export class RbacCacheService {
     ): Promise<boolean | null> => {
         try {
             const key = this.buildPermissionKey(userId, permission, context);
-            const cached = await redis.get(key)
+            const cached = await redisCache.get(key)
             if (cached === null) return null;
             return cached === "1";
         }
@@ -50,7 +49,7 @@ export class RbacCacheService {
     ): Promise<void> => {
         try {
             const key = this.buildMembershipKey(userId, context);
-            await redis.setex(key, this.TTL.MEMBERSHIP, JSON.stringify(memberships));
+            await redisCache.setex(key, this.TTL.MEMBERSHIP, JSON.stringify(memberships));
         }
         catch (err) {
             console.error("Error caching membership:", err);
@@ -62,7 +61,7 @@ export class RbacCacheService {
     ): Promise<Membership[] | null> => {
         try {
             const key = this.buildMembershipKey(userId, context);
-            const cached = await redis.get(key)
+            const cached = await redisCache.get(key)
             if (!cached) return null;
             return JSON.parse(cached) as Membership[];
         }
@@ -80,7 +79,7 @@ export class RbacCacheService {
     ): Promise<void> => {
         try {
             const key = this.buildOwnershipKey(userId, workspaceId, 'workspace');
-            await redis.setex(key, this.TTL.OWNERSHIP, isOwner ? "1" : "0");
+            await redisCache.setex(key, this.TTL.OWNERSHIP, isOwner ? "1" : "0");
         }
         catch (err) {
             console.error("Error caching workspace owner:", err);
@@ -89,7 +88,7 @@ export class RbacCacheService {
     getCacheWorkspaceOwner = async (userId: string, workspaceId: string): Promise<boolean | null> => {
         try {
             const key = this.buildOwnershipKey(userId, workspaceId, 'workspace');
-            const cached = await redis.get(key);
+            const cached = await redisCache.get(key);
             if (cached === null) return null;
             return cached === "1";
         }
@@ -207,7 +206,7 @@ export class RbacCacheService {
 
         do {
             // SCAN instead of KEYS để không block Redis
-            const [newCursor, keys] = await redis.scan(
+            const [newCursor, keys] = await redisCache.scan(
                 cursor,
                 'MATCH',
                 pattern,
@@ -218,7 +217,7 @@ export class RbacCacheService {
             cursor = newCursor;
 
             if (keys.length > 0) {
-                await redis.del(...keys);
+                await redisCache.del(...keys);
                 deletedCount += keys.length;
             }
         } while (cursor !== '0');

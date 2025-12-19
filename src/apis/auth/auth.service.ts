@@ -1,4 +1,4 @@
-import redisClient from '@/config/redis.config';
+import { redisCache } from '@/config/redis.config';
 
 import { toUserResponse } from '../user/mapper/user.mapper';
 import { CompleteRegisterForm, PostRegisterSchema, RegisterForm, RequestOTPForm, RequestOTPResponse, VerifyOTPForm, ResetPasswordForm, ResetPasswordFormHaveLoggedIn } from './schemas/auth.schema';
@@ -137,11 +137,11 @@ export default class AuthService {
             otp: otp,
             isVerified: false
         };
-        await redisClient.set(redisKey, JSON.stringify(otpData), 'EX', 300);
+        await redisCache.set(redisKey, JSON.stringify(otpData), 'EX', 300);
         await this.emailService.sendOTP(email, otp);
         if (process.env.NODE_ENV !== 'production') {
             console.log(`[DEV] requestOTP stored ${redisKey} ->`, otpData);
-            const ttl = await redisClient.ttl(redisKey);
+            const ttl = await redisCache.ttl(redisKey);
             console.log(`[DEV] ${redisKey} TTL=${ttl}s`);
         }
 
@@ -155,7 +155,7 @@ export default class AuthService {
         const email = rawEmail.trim().toLowerCase();
         const otp = data.otp.trim();
         const redisKey = `otp:${email}`;
-        const dataStr = await redisClient.get(redisKey);
+        const dataStr = await redisCache.get(redisKey);
         if (!dataStr) {
             throw new BadRequestError('OTP has expired or does not exist!');
         }
@@ -165,7 +165,7 @@ export default class AuthService {
             throw new BadRequestError('Invalid OTP!');
         }
         otpData.isVerified = true;
-        await redisClient.set(redisKey, JSON.stringify(otpData), 'EX', 600);
+        await redisCache.set(redisKey, JSON.stringify(otpData), 'EX', 600);
         return {
             email,
             message: 'OTP verified successfully.'
@@ -212,10 +212,10 @@ export default class AuthService {
 
         // mark a short-lived 'forgot verified' flag so reset can proceed without OTP
         const verifiedKey = `forgot-verified:${email}`;
-        await redisClient.set(verifiedKey, '1', 'EX', 600);
+        await redisCache.set(verifiedKey, '1', 'EX', 600);
 
         if (process.env.NODE_ENV !== 'production') {
-            const ttl = await redisClient.ttl(verifiedKey);
+            const ttl = await redisCache.ttl(verifiedKey);
             console.log(`[DEV] verifyForgotOTP set ${verifiedKey} TTL=${ttl}s`);
         }
 
@@ -230,7 +230,7 @@ export default class AuthService {
             throw new BadRequestError('Email is required.');
         }
         const verifiedKey = `forgot-verified:${email}`;
-        const verified = await redisClient.get(verifiedKey);
+        const verified = await redisCache.get(verifiedKey);
         if (!verified) {
             throw new BadRequestError('OTP not verified. Please verify OTP before resetting password.');
         }
@@ -240,7 +240,7 @@ export default class AuthService {
         const updatedUser = await this.userRepository.update(user.id, user);
         // No need to explicitly delete OTP here — Redis TTL will expire the key.
         // remove verified flag after successful reset
-        await redisClient.del(verifiedKey);
+        await redisCache.del(verifiedKey);
         return {
             message: 'Password has been reset successfully.',
             email,
