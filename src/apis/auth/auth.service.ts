@@ -1,5 +1,4 @@
 import { redisCache, redisStream } from '@/config/redis.config';
-
 import { toUserResponse } from '../user/mapper/user.mapper';
 import { CompleteRegisterForm, PostRegisterSchema, RegisterForm, RequestOTPForm, RequestOTPResponse, VerifyOTPForm, ResetPasswordForm, ResetPasswordFormHaveLoggedIn } from './schemas/auth.schema';
 import { User } from "@/common/entities/user.entity";
@@ -105,7 +104,7 @@ export default class AuthService {
         }
         const otp = this.otpService.generateOTP();
         await this.otpService.saveOTP(email, otp);
-        await this.emailService.sendOTP(email, otp);
+        await redisStream.xadd(EMAIL_STREAM, '*', 'type', 'send_otp', 'email', email, 'otp', otp);
         return {
             email,
             message: 'OTP has been resent to your email address.'
@@ -120,59 +119,6 @@ export default class AuthService {
         console.log('Generated refresh token for Google login:', refreshToken); // Debug log
         return { refreshToken }
     }
-
-    // register v2:
-    requestOTP = async (data: RequestOTPForm): Promise<RequestOTPResponse> => {
-        const rawEmail = data.email;
-        const email = rawEmail.trim().toLowerCase();
-        const existingUser = await this.userRepository.findByEmail(email);
-        if (existingUser) {
-            throw new ConflictRequestError(`This email exist in this application!`)
-        }
-        const otp = crypto.randomInt(100000, 999999).toString();
-        // 2. Dùng Redis key thay vì DB
-        const redisKey = `otp:${email}`;
-
-        // Lưu OTP và trạng thái chưa xác thực
-        const otpData: OtpRedisData = {
-            otp: otp,
-            isVerified: false
-        };
-        await redisCache.set(redisKey, JSON.stringify(otpData), 'EX', 300);
-        await this.emailService.sendOTP(email, otp);
-        if (process.env.NODE_ENV !== 'production') {
-            console.log(`[DEV] requestOTP stored ${redisKey} ->`, otpData);
-            const ttl = await redisCache.ttl(redisKey);
-            console.log(`[DEV] ${redisKey} TTL=${ttl}s`);
-        }
-
-        return {
-            email: email,
-            message: 'OTP has been sent to your email.'
-        }
-    }
-    verifyOTP = async (data: VerifyOTPForm): Promise<{ email: string, message: string }> => {
-        const rawEmail = data.email;
-        const email = rawEmail.trim().toLowerCase();
-        const otp = data.otp.trim();
-        const redisKey = `otp:${email}`;
-        const dataStr = await redisCache.get(redisKey);
-        if (!dataStr) {
-            throw new BadRequestError('OTP has expired or does not exist!');
-        }
-
-        const otpData: OtpRedisData = JSON.parse(dataStr);
-        if (otpData.otp !== otp) {
-            throw new BadRequestError('Invalid OTP!');
-        }
-        otpData.isVerified = true;
-        await redisCache.set(redisKey, JSON.stringify(otpData), 'EX', 600);
-        return {
-            email,
-            message: 'OTP verified successfully.'
-        }
-    }
-
     // Forgot password: request OTP for existing account
     requestForgotPassword = async (data: RequestOTPForm): Promise<RequestOTPResponse> => {
         const rawEmail = data.email;
@@ -190,7 +136,7 @@ export default class AuthService {
 
         const otp = this.otpService.generateOTP();
         await this.otpService.saveOTP(email, otp);
-        await this.emailService.sendOTP(email, otp);
+        await redisStream.xadd(EMAIL_STREAM, '*', 'type', 'forgot_password', 'email', email, 'otp', otp);
 
         if (process.env.NODE_ENV !== 'production') {
             // OTP stored under OtpService keys (debug only)

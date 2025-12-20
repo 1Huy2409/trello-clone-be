@@ -8,11 +8,10 @@ const MAX_RETRIES = 3;
 const IDLE_TIME = 10000;
 const emailService: EmailService = new EmailService();
 async function handleMessageProcessing(id: string, messageData: any) {
-    const { email, otp } = messageData;
     try {
-        await emailService.sendOTP(email, otp);
+        await emailService.sendEmail(messageData);
         await redisStream.xack(EMAIL_STREAM, EMAIL_GROUP, id);
-        console.log(`Sent OTP to ${email} successfully!`);
+        console.log(`Sent OTP to ${messageData.email} successfully!`);
     } catch (err) {
         console.error("Send email failed", err);
     }
@@ -97,14 +96,31 @@ async function startRetryConsumer() {
     }, 5000);
 }
 function parseMessage(fields: string[]) {
-    const payload: any = {};
+    const flatPayload: any = {};
     for (let i = 0; i < fields.length; i += 2) {
         const key = fields[i];
         if (key) {
-            payload[key] = fields[i + 1];
+            flatPayload[key] = fields[i + 1];
         }
     }
-    return payload;
+
+    // Transform flat structure to nested structure expected by EmailService
+    const { type, email, mailPayload, ...rest } = flatPayload;
+
+    let data: any;
+    if (mailPayload) {
+        // For board_invitation which sends mailPayload as JSON
+        data = JSON.parse(mailPayload);
+    } else {
+        // For send_otp and forgot_password which send flat otp field
+        data = rest;
+    }
+
+    return {
+        type,
+        email,
+        data
+    };
 }
 
 async function startWorkerStream() {

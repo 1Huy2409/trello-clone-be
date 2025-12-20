@@ -13,6 +13,8 @@ import { BoardJoinLink } from "@/common/entities/board-join-link.entity";
 import { RoleScope } from "@/common/entities/role.entity";
 import { nanoid } from "nanoid";
 import { EmailService } from "@/common/utils/mailService";
+import { redisStream } from "@/config/redis.config";
+import { EMAIL_STREAM } from "@/common/constants/redis";
 
 export default class BoardService {
     private emailService: EmailService;
@@ -213,23 +215,21 @@ export default class BoardService {
     }
 
     inviteByEmail = async (boardId: string, data: InviteByEmailDto, inviterId: string): Promise<{
-        message: string;
-        userExists?: boolean;
-        userId?: string;
-        inviteLink?: string;
-        expiresAt?: Date | null;
-        emailSent?: boolean;
-        error?: string;
+        message: string
     }> => {
         const board = await this.boardRepository.findById(boardId);
         if (!board) {
             throw new NotFoundError('Board not found');
         }
 
-        // Find user by email
         const invitedUser = await this.userRepository.findByEmail(data.email);
+        if (invitedUser) {
+            const existingMember = await this.boardMemberRepository.findByBoardAndUserId(boardId, invitedUser.id);
+            if (existingMember) {
+                throw new ConflictRequestError('User is already a member of this board');
+            }
+        }
 
-        // Get roleId - if not provided, use board_member role
         let roleId = data.roleId;
         if (!roleId) {
             const boardMemberRole = await this.roleRepository.findByName('board_member', RoleScope.BOARD);
@@ -239,91 +239,27 @@ export default class BoardService {
             roleId = boardMemberRole.id;
         }
 
-        // Get inviter info for email
         const inviter = await this.userRepository.findById(inviterId);
         const inviterName = inviter?.fullname || inviter?.username || 'A team member';
 
-        // If user exists, add them to the board directly
-        if (invitedUser) {
-            // Check if already a member
-            const existingMember = await this.boardMemberRepository.findByBoardAndUserId(boardId, invitedUser.id);
-            if (existingMember) {
-                throw new ConflictRequestError('User is already a member of this board');
-            }
-
-            // Add user to board
-            await this.boardMemberRepository.create({
-                boardId,
-                userId: invitedUser.id,
-                roleId,
-            });
-
-            // Send notification email for existing user
-            try {
-                const boardLink = `${process.env.FRONTEND_BASE_URL || 'http://localhost:3000'}/boards/${boardId}`;
-                await this.emailService.sendBoardInvitation(
-                    data.email,
-                    board.title,
-                    inviterName,
-                    boardLink,
-                    null // No expiration for existing users
-                );
-
-                return {
-                    message: 'User added to board successfully and notification email sent',
-                    userExists: true,
-                    userId: invitedUser.id,
-                    emailSent: true,
-                };
-            } catch (error) {
-                // User was added but email failed
-                return {
-                    message: 'User added to board successfully but email notification failed',
-                    userExists: true,
-                    userId: invitedUser.id,
-                    emailSent: false,
-                    error: error instanceof Error ? error.message : 'Unknown error',
-                };
-            }
-        }
-
-        // User doesn't exist - create invite link and send email
+        // create invite link
         const inviteLink = await this.createBoardJoinLink(
             boardId,
             inviterId,
             {
-                expiresIn: 7 * 24 * 60 * 60 * 1000, // 7 days for email invites
-                maxUses: 1, // One-time use for email invites
+                expiresIn: 7,
+                maxUses: 1,
             }
         );
-
-        // Send invitation email
-        try {
-            await this.emailService.sendBoardInvitation(
-                data.email,
-                board.title,
-                inviterName,
-                inviteLink.fullLink,
-                inviteLink.expiresAt
-            );
-
-            return {
-                message: 'Invitation email sent successfully',
-                userExists: false,
-                inviteLink: inviteLink.fullLink,
-                expiresAt: inviteLink.expiresAt,
-                emailSent: true,
-            };
-        } catch (error) {
-            // If email fails, still return the invite link
-            return {
-                message: 'Invite link created but email sending failed. Please share the link manually.',
-                userExists: false,
-                inviteLink: inviteLink.fullLink,
-                expiresAt: inviteLink.expiresAt,
-                emailSent: false,
-                error: error instanceof Error ? error.message : 'Unknown error',
-            };
+        const mailPayload = {
+            title: board.title,
+            inviterName,
+            inviteLink: inviteLink.fullLink,
+            expiresAt: inviteLink.expiresAt,
+        }
+        await redisStream.xadd(EMAIL_STREAM, '*', 'type', 'board_invitation', 'email', data.email, 'mailPayload', JSON.stringify(mailPayload));
+        return {
+            message: 'Invitation sent successfully'
         }
     }
 
@@ -334,8 +270,6 @@ export default class BoardService {
         }
 
         const members = await this.boardMemberRepository.findByBoardId(boardId);
-
-        // Populate user and role info
         const membersWithDetails = await Promise.all(
             members.map(async (member) => {
                 const user = await this.userRepository.findById(member.userId);
@@ -362,13 +296,9 @@ export default class BoardService {
         if (!joinLink.isActive) {
             throw new BadRequestError('Join link is inactive');
         }
-
-        // Only check expiration if expiresAt is set
         if (joinLink.expiresAt && new Date() > joinLink.expiresAt) {
             throw new BadRequestError('Join link has expired');
         }
-
-        // Only check max uses if it's set
         if (joinLink.maxUses && joinLink.usedCount >= joinLink.maxUses) {
             throw new BadRequestError('Join link has reached its maximum uses');
         }

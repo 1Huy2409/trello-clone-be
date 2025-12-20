@@ -16,8 +16,8 @@ export const PostBoardJoinLinkRequest: ZodRequestBody = {
     description: 'Create a join link for a board',
     content: {
         'application/json': {
-            schema: CreateBoardJoinLinkSchema.openapi({ 
-                example: { expiresIn: 7, maxUses: 10 } 
+            schema: CreateBoardJoinLinkSchema.openapi({
+                example: { expiresIn: 7, maxUses: 10 }
             })
         }
     }
@@ -34,19 +34,19 @@ export const PostJoinBoardByLinkRequest: ZodRequestBody = {
     description: 'Join a board using a join link token',
     content: {
         'application/json': {
-            schema: JoinBoardByLinkSchema.openapi({ 
-                example: { token: 'abc123token' } 
+            schema: JoinBoardByLinkSchema.openapi({
+                example: { token: 'abc123token' }
             })
         }
     }
 }
 
 export const InviteByEmailSchema = z.object({
-    email: z.string().email().openapi({
+    email: z.email().openapi({
         description: 'Email address to send invitation',
         example: 'user@example.com'
     }),
-    roleId: z.string().uuid().optional().openapi({
+    roleId: z.uuid().optional().openapi({
         description: 'Role ID to assign to the invited member. If not provided, defaults to board_member role.',
         example: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
     })
@@ -56,11 +56,11 @@ export const PostInviteByEmailRequest: ZodRequestBody = {
     description: 'Invite a user to the board via email',
     content: {
         'application/json': {
-            schema: InviteByEmailSchema.openapi({ 
-                example: { 
+            schema: InviteByEmailSchema.openapi({
+                example: {
                     email: 'user@example.com',
                     roleId: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
-                } 
+                }
             })
         }
     }
