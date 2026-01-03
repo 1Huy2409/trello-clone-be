@@ -8,7 +8,7 @@ export class Checklist extends DateTimeEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column()
+    @Column({ type: 'varchar', length: 255, nullable: false })
     name: string;
 
     @Column({

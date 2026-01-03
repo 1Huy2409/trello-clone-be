@@ -8,9 +8,12 @@ import { AppDataSource } from "@/config/db.config";
 import { List } from "../entities/list.entity";
 import { CardRepository } from "@/apis/card/repositories/card.repository";
 import { Card } from "../entities/card.entity";
+import { ChecklistRepository } from "@/apis/checklist/repositories/checklist.repository";
+import { Checklist } from "../entities/checklist.entity";
 const authorizationHelper = new AuthorizationHelper();
 const listRepository = new ListRepository(AppDataSource.getRepository(List));
 const cardRepository = new CardRepository(AppDataSource.getRepository(Card));
+const checklistRepository = new ChecklistRepository(AppDataSource.getRepository(Checklist));
 export const checkWorkspacePermission = (requiredPermission: PermissionKey) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -217,6 +220,43 @@ export const checkCrossCardPermission = (
         }
         catch (error) {
             console.error('Error in checkCrossCardPermission middleware:', error);
+            next(error)
+        }
+    }
+}
+export const checkChecklistPermission = (requiredPermission: PermissionKey) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const userId = req.user?.id
+            if (!userId) {
+                throw new AuthFailureError('User not authenticated', 401);
+            }
+            const checklistId = req.params.checklistId || req.params.id || req.body.checklistId;
+            if (!checklistId) {
+                throw new BadRequestError('Checklist ID is required');
+            }
+            const checklist = await checklistRepository.getChecklistById(checklistId);
+            if (!checklist) {
+                throw new BadRequestError(`Checklist with ID ${checklistId} not found`);
+            }
+            const cardId = checklist.cardId;
+            const card = await cardRepository.getCardById(cardId);
+            if (!card) {
+                throw new BadRequestError(`Card with ID ${cardId} not found`);
+            }
+            const boardId = card.boardId;
+            const hasPermission = await authorizationHelper.canAccessBoard(
+                userId,
+                boardId,
+                requiredPermission
+            )
+            if (!hasPermission) {
+                throw new ForbiddenError('You do not have permission to access this board');
+            }
+            next();
+        }
+        catch (error) {
+            console.error('Error in checkChecklistPermission middleware:', error);
             next(error)
         }
     }
