@@ -1,6 +1,7 @@
 import { Checklist } from "@/common/entities/checklist.entity";
 import { IChecklistRepository } from "./checklist.repository.interface";
 import { EntityManager, Repository } from "typeorm";
+import { NotFoundError } from "@/common/handler/error.response";
 
 export class ChecklistRepository implements IChecklistRepository {
     constructor(
@@ -32,6 +33,10 @@ export class ChecklistRepository implements IChecklistRepository {
     }
     async delete(id: string, manager?: EntityManager): Promise<void> {
         const repo = manager ? manager.getRepository(Checklist) : this.checklistRepo;
-        await repo.delete(id);
+        const checklist = await repo.findOne({ where: { id } });
+        if (!checklist) {
+            throw new NotFoundError('Checklist not found');
+        }
+        await repo.remove(checklist);
     }
 }
