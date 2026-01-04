@@ -1,5 +1,5 @@
 import { Checklist } from "@/common/entities/checklist.entity";
-import { ChecklistResponse } from "../schemas/checklist/checklist.response.schema";
+import { ChecklistResponse } from "../schemas/checklist.response.schema";
 
 export const toChecklistResponse = (checklist: Checklist): ChecklistResponse => {
     return {
