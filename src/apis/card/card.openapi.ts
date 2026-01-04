@@ -5,6 +5,7 @@ import { createApiResponse } from "@/api-docs/openAPIResponseBuilder";
 import z from "zod";
 import { CardMemberResponseSchema } from "./schemas/card-member/card-member.response.schema";
 import { AssignMemberToCardRequest, RemoveMemberFromCardRequest } from "./schemas/card-member/card-member.request.schema";
+import { ChecklistResponseSchema, CreateChecklistRequest } from "../checklist/schemas";
 
 export const cardRegistry = new OpenAPIRegistry();
 cardRegistry.register('Card', CardResponseSchema);
@@ -36,6 +37,20 @@ export function registerCardPaths() {
             }),
         },
         responses: createApiResponse(CardMemberResponseSchema, 'Success')
+    })
+    cardRegistry.registerPath({
+        method: 'post',
+        path: '/api/v1/cards/{id}/checklists',
+        tags: ['Checklist'],
+        security: [{ bearerAuth: [] }],
+        summary: 'Create a checklist for a card',
+        request: {
+            body: CreateChecklistRequest,
+            params: z.object({
+                id: z.uuid().openapi({ description: 'ID of the card', example: 'a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6' })
+            }),
+        },
+        responses: createApiResponse(ChecklistResponseSchema, 'Success')
     })
     cardRegistry.registerPath({
         method: 'delete',

@@ -63,6 +63,12 @@ import { CardMemberRepository } from '@/apis/card/repositories/card-member.repos
 import { Activity } from '../entities/activity.entity'
 import { ActivityRepository } from '@/apis/activity/repositories/activity.repository'
 import { ActivitySubscriber } from '@/apis/activity/activity.subscriber'
+import { Checklist } from '../entities/checklist.entity'
+import { ChecklistRepository } from '@/apis/checklist/repositories/checklist.repository'
+import ChecklistService from '@/apis/checklist/checklist.service'
+import ChecklistController from '@/apis/checklist/checklist.controller'
+import { registerChecklistPaths } from '@/apis/checklist/checklist.openapi'
+import checklistRouter from '@/apis/checklist/checklist.router'
 
 const mainRouter: Router = express.Router()
 const initHealthCheckModule = () => {
@@ -205,10 +211,22 @@ const initCardModule = () => {
     const cardMemberOrmRepo = AppDataSource.getRepository(CardMember);
     const cardMemberRepository = new CardMemberRepository(cardMemberOrmRepo);
     const cardService = new CardService(cardRepository, listRepository, boardRepository, userRepository, boardMemberRepository, cardMemberRepository, AppDataSource)
-    const cardController = new CardController(cardService);
+    const checklistOrmRepo = AppDataSource.getRepository(Checklist);
+    const checklistRepository = new ChecklistRepository(checklistOrmRepo);
+    const checklistService = new ChecklistService(checklistRepository, AppDataSource);
+    const cardController = new CardController(cardService, checklistService);
     registerCardPaths();
 
     mainRouter.use('/cards', cardRouter(cardController))
+}
+const initChecklistModule = () => {
+    const checklistOrmRepo = AppDataSource.getRepository(Checklist);
+    const checklistRepository = new ChecklistRepository(checklistOrmRepo);
+    const checklistService = new ChecklistService(checklistRepository, AppDataSource);
+    const checklistController = new ChecklistController(checklistService);
+
+    registerChecklistPaths();
+    mainRouter.use('/checklists', checklistRouter(checklistController))
 }
 const initActivityModule = () => {
     const activityOrmRepo = AppDataSource.getRepository(Activity);
@@ -224,5 +242,6 @@ initJoinLinkModule();
 initBoardModule();
 initListModule();
 initCardModule();
+initChecklistModule();
 initActivityModule();
 export default mainRouter;

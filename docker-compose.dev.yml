@@ -5,6 +5,9 @@ services:
     ports: 
       - "${POSTGRES_PORT}:5432"
     restart: on-failure
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - PGTZ=Asia/Ho_Chi_Minh
     env_file:
       - .env
     volumes:

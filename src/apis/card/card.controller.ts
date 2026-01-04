@@ -5,9 +5,14 @@ import { AuthFailureError, BadRequestError } from "@/common/handler/error.respon
 import { ResponseStatus, ServiceResponse } from "@/common/models/service.response";
 import { StatusCodes } from "http-status-codes";
 import { handleServiceResponse } from "@/common/utils/httpHandler";
+import ChecklistService from "../checklist/checklist.service";
+import { CreateChecklistSchema } from "../checklist/schemas";
 
 export default class CardController {
-    constructor(private cardService: CardService) { }
+    constructor(
+        private cardService: CardService,
+        private checklistService: ChecklistService
+    ) { }
 
     updateCard = async (req: Request, res: Response) => {
         const cardId = req.params.id;
@@ -132,6 +137,23 @@ export default class CardController {
             'Get card members successfully',
             cardMembers,
             StatusCodes.OK
+        )
+        return handleServiceResponse(serviceResponse, res);
+    }
+
+    createChecklist = async (req: Request, res: Response) => {
+        console.log('Controller already hit');
+        const cardId = req.params.id || req.params.cardId;
+        if (!cardId) {
+            throw new BadRequestError('Card ID is required');
+        }
+        const checklistData: CreateChecklistSchema = req.body;
+        const newChecklist = await this.checklistService.createChecklist(cardId, checklistData);
+        const serviceResponse = new ServiceResponse(
+            ResponseStatus.Sucess,
+            'Create checklist successfully',
+            newChecklist,
+            StatusCodes.CREATED
         )
         return handleServiceResponse(serviceResponse, res);
     }

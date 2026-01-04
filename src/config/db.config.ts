@@ -17,6 +17,8 @@ import { RolePermission } from "../common/entities/role-permission.entity";
 import { config } from "dotenv";
 import { WorkspaceJoinLink } from "../common/entities/workspace-join-link.entity";
 import { Activity } from "../common/entities/activity.entity";
+import { Checklist } from "../common/entities/checklist.entity";
+import { ChecklistItem } from "../common/entities/checklist-item.entity";
 config();
 export const AppDataSource = new DataSource({
     type: 'postgres',
@@ -28,7 +30,7 @@ export const AppDataSource = new DataSource({
     connectTimeoutMS: 10000,
     synchronize: true,
     logging: true,
-    entities: [User, Workspace, WorkspaceMember, Notification, List, Comment, Card, CardMember, Board, BoardMember, BoardJoinLink, Role, Permission, RolePermission, WorkspaceJoinLink, Activity],
+    entities: [User, Workspace, WorkspaceMember, Notification, List, Comment, Card, CardMember, Board, BoardMember, BoardJoinLink, Role, Permission, RolePermission, WorkspaceJoinLink, Activity, Checklist, ChecklistItem],
     migrations: [path.join(__dirname, '../common/migrations/*.{ts,js}')],
     migrationsRun: false
 })
