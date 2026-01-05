@@ -140,7 +140,20 @@ export default class CardController {
         )
         return handleServiceResponse(serviceResponse, res);
     }
-
+    getChecklistsByCardId = async (req: Request, res: Response) => {
+        const cardId = req.params.id || req.params.cardId;
+        if (!cardId) {
+            throw new BadRequestError('Card ID is required');
+        }
+        const checklists = await this.checklistService.getChecklistsByCardId(cardId);
+        const serviceResponse = new ServiceResponse(
+            ResponseStatus.Sucess,
+            'Get checklists by card ID successfully',
+            checklists,
+            StatusCodes.OK
+        )
+        return handleServiceResponse(serviceResponse, res);
+    }
     createChecklist = async (req: Request, res: Response) => {
         console.log('Controller already hit');
         const cardId = req.params.id || req.params.cardId;

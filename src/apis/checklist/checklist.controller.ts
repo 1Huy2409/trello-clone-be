@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import ChecklistService from "./checklist.service";
+import ChecklistItemService from "@/apis/checklist-item/checklist-item.service";
 import { ReorderChecklistSchema, UpdateChecklistSchema } from "./schemas";
+import { CreateChecklistItemSchema } from "@/apis/checklist-item/schemas";
 import { BadRequestError } from "@/common/handler/error.response";
 import { ResponseStatus, ServiceResponse } from "@/common/models/service.response";
 import { StatusCodes } from "http-status-codes";
@@ -8,8 +10,38 @@ import { handleServiceResponse } from "@/common/utils/httpHandler";
 
 export default class ChecklistController {
     constructor(
-        private checklistService: ChecklistService
-    ) {}
+        private checklistService: ChecklistService,
+        private checklistItemService: ChecklistItemService
+    ) { }
+    getChecklistItemsByChecklistId = async (req: Request, res: Response) => {
+        const checklistId = req.params.checklistId || req.params.id;
+        if (!checklistId) {
+            throw new BadRequestError('Checklist ID is required');
+        }
+        const checklistItems = await this.checklistItemService.getAllChecklistItems(checklistId);
+        const serviceResponse = new ServiceResponse(
+            ResponseStatus.Sucess,
+            'Get checklist items by checklist ID successfully',
+            checklistItems,
+            StatusCodes.OK
+        )
+        return handleServiceResponse(serviceResponse, res);
+    }
+    createChecklistItem = async (req: Request, res: Response) => {
+        const checklistId = req.params.checklistId || req.params.id;
+        if (!checklistId) {
+            throw new BadRequestError('Checklist ID is required');
+        }
+        const createData: CreateChecklistItemSchema = req.body;
+        const newItem = await this.checklistItemService.createChecklistItem(checklistId, createData);
+        const serviceResponse = new ServiceResponse(
+            ResponseStatus.Sucess,
+            'Checklist item created successfully',
+            newItem,
+            StatusCodes.CREATED
+        );
+        return handleServiceResponse(serviceResponse, res);
+    }
 
     updateChecklist = async (req: Request, res: Response) => {
         const checklistId = req.params.checklistId || req.params.id;

@@ -69,6 +69,12 @@ import ChecklistService from '@/apis/checklist/checklist.service'
 import ChecklistController from '@/apis/checklist/checklist.controller'
 import { registerChecklistPaths } from '@/apis/checklist/checklist.openapi'
 import checklistRouter from '@/apis/checklist/checklist.router'
+import { ChecklistItem } from '@/common/entities/checklist-item.entity'
+import { ChecklistItemRepository } from '@/apis/checklist-item/repositories/checklist-item.repository'
+import ChecklistItemService from '@/apis/checklist-item/checklist-item.service'
+import ChecklistItemController from '@/apis/checklist-item/checklist-item.controller'
+import checklistItemRouter from '@/apis/checklist-item/checklist-item.router'
+import { registerChecklistItemPaths } from '@/apis/checklist-item/checklist-item.openapi'
 
 const mainRouter: Router = express.Router()
 const initHealthCheckModule = () => {
@@ -223,10 +229,24 @@ const initChecklistModule = () => {
     const checklistOrmRepo = AppDataSource.getRepository(Checklist);
     const checklistRepository = new ChecklistRepository(checklistOrmRepo);
     const checklistService = new ChecklistService(checklistRepository, AppDataSource);
-    const checklistController = new ChecklistController(checklistService);
+
+    const checklistItemOrmRepo = AppDataSource.getRepository(ChecklistItem);
+    const checklistItemRepository = new ChecklistItemRepository(checklistItemOrmRepo);
+    const checklistItemService = new ChecklistItemService(checklistItemRepository, AppDataSource);
+
+    const checklistController = new ChecklistController(checklistService, checklistItemService);
 
     registerChecklistPaths();
     mainRouter.use('/checklists', checklistRouter(checklistController))
+}
+const initChecklistItemModule = () => {
+    const checklistItemOrmRepo = AppDataSource.getRepository(ChecklistItem);
+    const checklistItemRepository = new ChecklistItemRepository(checklistItemOrmRepo);
+    const checklistItemService = new ChecklistItemService(checklistItemRepository, AppDataSource);
+    const checklistItemController = new ChecklistItemController(checklistItemService);
+
+    registerChecklistItemPaths();
+    mainRouter.use('/checklist-items', checklistItemRouter(checklistItemController));
 }
 const initActivityModule = () => {
     const activityOrmRepo = AppDataSource.getRepository(Activity);
@@ -243,5 +263,6 @@ initBoardModule();
 initListModule();
 initCardModule();
 initChecklistModule();
+initChecklistItemModule();
 initActivityModule();
 export default mainRouter;

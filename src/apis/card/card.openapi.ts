@@ -1,6 +1,6 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import { CardResponseSchema } from "./schemas/card/card.response.schema";
-import { CopyCardRequest, MoveCardRequest, MoveCardSchema, ReorderCardRequest, UpdateCardRequest } from "./schemas/card/card.request.schema";
+import { CopyCardRequest, MoveCardRequest, ReorderCardRequest, UpdateCardRequest } from "./schemas/card/card.request.schema";
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilder";
 import z from "zod";
 import { CardMemberResponseSchema } from "./schemas/card-member/card-member.response.schema";
@@ -9,7 +9,7 @@ import { ChecklistResponseSchema, CreateChecklistRequest } from "../checklist/sc
 
 export const cardRegistry = new OpenAPIRegistry();
 cardRegistry.register('Card', CardResponseSchema);
-
+cardRegistry.register('Checklist', ChecklistResponseSchema);
 export function registerCardPaths() {
     cardRegistry.registerPath({
         method: 'get',
@@ -23,6 +23,19 @@ export function registerCardPaths() {
             })
         },
         responses: createApiResponse(z.array(CardMemberResponseSchema), 'Success')
+    })
+    cardRegistry.registerPath({
+        method: 'get',
+        path: '/api/v1/cards/{id}/checklists',
+        tags: ['Card'],
+        security: [{ bearerAuth: [] }],
+        summary: 'Get checklists of a card',
+        request: {
+            params: z.object({
+                id: z.uuid().openapi({ description: 'ID of the card', example: 'a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6' })
+            })
+        },
+        responses: createApiResponse(z.array(ChecklistResponseSchema), 'Success')
     })
     cardRegistry.registerPath({
         method: 'post',
