@@ -225,7 +225,7 @@ const initCardModule = () => {
     const checklistItemOrmRepo = AppDataSource.getRepository(ChecklistItem);
     const checklistItemRepository = new ChecklistItemRepository(checklistItemOrmRepo);
     const cardService = new CardService(cardRepository, listRepository, boardRepository, userRepository, boardMemberRepository, cardMemberRepository, checklistRepository, checklistItemRepository, AppDataSource)
-    const checklistService = new ChecklistService(checklistRepository, AppDataSource);
+    const checklistService = new ChecklistService(checklistRepository, cardRepository, checklistItemRepository, AppDataSource);
     const cardController = new CardController(cardService, checklistService);
     registerCardPaths();
 
@@ -234,10 +234,13 @@ const initCardModule = () => {
 const initChecklistModule = () => {
     const checklistOrmRepo = AppDataSource.getRepository(Checklist);
     const checklistRepository = new ChecklistRepository(checklistOrmRepo);
-    const checklistService = new ChecklistService(checklistRepository, AppDataSource);
-
+    const cardOrmRepo = AppDataSource.getRepository(Card);
+    const cardRepository = new CardRepository(cardOrmRepo);
     const checklistItemOrmRepo = AppDataSource.getRepository(ChecklistItem);
     const checklistItemRepository = new ChecklistItemRepository(checklistItemOrmRepo);
+
+    const checklistService = new ChecklistService(checklistRepository, cardRepository, checklistItemRepository, AppDataSource);
+
     const checklistItemService = new ChecklistItemService(checklistItemRepository, AppDataSource);
 
     const checklistController = new ChecklistController(checklistService, checklistItemService);
