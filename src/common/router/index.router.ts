@@ -198,7 +198,11 @@ const initListModule = () => {
         cardRepository,
         AppDataSource
     )
-    const cardService = new CardService(cardRepository, listRepository, boardRepository, userRepository, boardMemberRepository, cardMemberRepository, AppDataSource)
+    const checklistOrmRepo = AppDataSource.getRepository(Checklist);
+    const checklistRepository = new ChecklistRepository(checklistOrmRepo);
+    const checklistItemOrmRepo = AppDataSource.getRepository(ChecklistItem);
+    const checklistItemRepository = new ChecklistItemRepository(checklistItemOrmRepo);
+    const cardService = new CardService(cardRepository, listRepository, boardRepository, userRepository, boardMemberRepository, cardMemberRepository, checklistRepository, checklistItemRepository, AppDataSource)
     registerListPaths();
     const listController = new ListController(listService, cardService);
     mainRouter.use('/lists', listRouter(listController))
@@ -216,9 +220,11 @@ const initCardModule = () => {
     const boardMemberRepository = new BoardMemberRepository(boardMemberOrmRepo);
     const cardMemberOrmRepo = AppDataSource.getRepository(CardMember);
     const cardMemberRepository = new CardMemberRepository(cardMemberOrmRepo);
-    const cardService = new CardService(cardRepository, listRepository, boardRepository, userRepository, boardMemberRepository, cardMemberRepository, AppDataSource)
     const checklistOrmRepo = AppDataSource.getRepository(Checklist);
     const checklistRepository = new ChecklistRepository(checklistOrmRepo);
+    const checklistItemOrmRepo = AppDataSource.getRepository(ChecklistItem);
+    const checklistItemRepository = new ChecklistItemRepository(checklistItemOrmRepo);
+    const cardService = new CardService(cardRepository, listRepository, boardRepository, userRepository, boardMemberRepository, cardMemberRepository, checklistRepository, checklistItemRepository, AppDataSource)
     const checklistService = new ChecklistService(checklistRepository, AppDataSource);
     const cardController = new CardController(cardService, checklistService);
     registerCardPaths();

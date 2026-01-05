@@ -12,6 +12,8 @@ import { IUserRepository } from '../user/repositories/user.repository.interface'
 import { ICardMemberRepository } from './repositories/card-member.repository.interface';
 import { IBoardMemberRepository } from '../board/repositories/board-member.repository.interface';
 import { toCardMemberResponse } from './mapper/card-member.mapper';
+import { IChecklistRepository } from '../checklist/repositories/checklist.repository.interface';
+import { IChecklistItemRepository } from '../checklist-item/repositories/checklist-item.repository.interface';
 import { EventBus } from '@/common/events/event-bus';
 import { createBaseEvent } from '@/common/events/event-factory';
 import { EventType } from '@/common/events/interface';
@@ -23,6 +25,8 @@ export default class CardService {
         private userRepository: IUserRepository,
         private boardMemberRepository: IBoardMemberRepository,
         private cardMemberRepository: ICardMemberRepository,
+        private checklistRepository: IChecklistRepository,
+        private checklistItemRepository: IChecklistItemRepository,
         private dataSource: DataSource
     ) { }
     createCard = async (data: CreateCardSchema, listId: string) => {
@@ -155,14 +159,41 @@ export default class CardService {
                 beforeCard?.position ?? null,
                 afterCard?.position ?? null
             );
+
+            // Explicitly copy allowed fields to ensure no ID or audit fields are carried over
             const newCardTitle = title ? title : `${cardToCopy.title} - Copy`;
             const copiedCard = await this.cardRepository.create({
-                ...cardToCopy,
+                title: newCardTitle,
+                description: cardToCopy.description,
+                priority: cardToCopy.priority,
+                coverUrl: cardToCopy.coverUrl,
+                dueDate: cardToCopy.dueDate,
                 listId: targetListId,
                 boardId: targetBoardId,
-                title: newCardTitle,
                 position: newPosition,
             }, manager);
+
+            // Deep copy checklists and items
+            const checklists = await this.checklistRepository.getChecklistsWithItemsByCardId(cardId, manager);
+            for (const checklist of checklists) {
+                const savedChecklist = await this.checklistRepository.create({
+                    name: checklist.name,
+                    position: checklist.position,
+                    cardId: copiedCard.id,
+                }, manager);
+
+                if (checklist.items && checklist.items.length > 0) {
+                    const newItemsData = checklist.items.map(item => ({
+                        content: item.content,
+                        isCompleted: item.isCompleted,
+                        position: item.position,
+                        checklistId: savedChecklist.id,
+                    }));
+                    for (const itemData of newItemsData) {
+                        await this.checklistItemRepository.create(itemData, manager);
+                    }
+                }
+            }
             return toCardResponse(copiedCard);
         })
     }
