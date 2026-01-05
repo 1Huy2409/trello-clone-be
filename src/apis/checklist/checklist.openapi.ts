@@ -1,5 +1,5 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
-import { ChecklistResponseSchema, ReorderChecklistRequest, UpdateChecklistRequest } from "./schemas";
+import { ChecklistResponseSchema, CopyChecklistRequest, ReorderChecklistRequest, UpdateChecklistRequest } from "./schemas";
 import { CreateChecklistItemRequest } from "@/apis/checklist-item/schemas";
 import { ChecklistItemResponseSchema } from "@/apis/checklist-item/schemas/checklist-item.response.schema";
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilder";
@@ -38,6 +38,21 @@ export function registerChecklistPaths() {
             })
         },
         responses: createApiResponse(ChecklistItemResponseSchema, 'Success')
+    })
+    checklistRegistry.registerPath({
+        method: 'post',
+        path: '/api/v1/checklists/{checklistId}/copy',
+        description: 'Copy a checklist to a card',
+        tags: ['Checklist'],
+        summary: 'Copy Checklist',
+        security: [{ bearerAuth: [] }],
+        request: {
+            body: CopyChecklistRequest,
+            params: z.object({
+                checklistId: z.uuid().openapi({ description: 'ID of the checklist to copy', example: 'f90a806a-bcb7-4e1a-94b7-9835a62e8a18' })
+            })
+        },
+        responses: createApiResponse(ChecklistResponseSchema, 'Success')
     })
     checklistRegistry.registerPath({
         method: 'patch',

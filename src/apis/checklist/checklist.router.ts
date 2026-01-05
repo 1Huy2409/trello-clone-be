@@ -23,6 +23,11 @@ export default function checklistRouter(checklistController: ChecklistController
         asyncHandler(checkChecklistPermission(PERMISSIONS.CARD_UPDATE)),
         asyncHandler(checklistController.createChecklistItem));
 
+    router.post('/:checklistId/copy',
+        asyncHandler(checkAuthentication),
+        asyncHandler(checkChecklistPermission(PERMISSIONS.CARD_UPDATE)),
+        asyncHandler(checklistController.copyChecklist));
+
     router.patch('/:checklistId',
         asyncHandler(checkAuthentication),
         asyncHandler(checkChecklistPermission(PERMISSIONS.CARD_UPDATE)),
