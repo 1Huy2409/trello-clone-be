@@ -13,6 +13,11 @@ export default function cardRouter(cardController: CardController): Router {
         asyncHandler(checkCardPermission(PERMISSIONS.CARD_VIEW)),
         asyncHandler(cardController.getCardMembers)
     )
+    router.get('/:id/checklists',
+        asyncHandler(checkAuthentication),
+        asyncHandler(checkCardPermission(PERMISSIONS.CARD_VIEW)),
+        asyncHandler(cardController.getChecklistsByCardId)
+    )
     router.post('/:id/members',
         asyncHandler(checkAuthentication),
         asyncHandler(checkCardPermission(PERMISSIONS.CARD_UPDATE)),

@@ -10,10 +10,13 @@ import { CardRepository } from "@/apis/card/repositories/card.repository";
 import { Card } from "../entities/card.entity";
 import { ChecklistRepository } from "@/apis/checklist/repositories/checklist.repository";
 import { Checklist } from "../entities/checklist.entity";
+import { ChecklistItemRepository } from "@/apis/checklist-item/repositories/checklist-item.repository";
+import { ChecklistItem } from "../entities/checklist-item.entity";
 const authorizationHelper = new AuthorizationHelper();
 const listRepository = new ListRepository(AppDataSource.getRepository(List));
 const cardRepository = new CardRepository(AppDataSource.getRepository(Card));
 const checklistRepository = new ChecklistRepository(AppDataSource.getRepository(Checklist));
+const checklistItemRepository = new ChecklistItemRepository(AppDataSource.getRepository(ChecklistItem))
 export const checkWorkspacePermission = (requiredPermission: PermissionKey) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         try {
@@ -256,7 +259,49 @@ export const checkChecklistPermission = (requiredPermission: PermissionKey) => {
             next();
         }
         catch (error) {
-            console.error('Error in checkChecklistPermission middleware:', error);
+            console.error('Error in ChecklistPermission middleware:', error);
+            next(error)
+        }
+    }
+}
+export const checkChecklistItemPermission = (requiredPermission: PermissionKey) => {
+    return async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const userId = req.user?.id
+            if (!userId) {
+                throw new AuthFailureError('User not authenticated', 401);
+            }
+            const checklistItemId = req.params.itemId || req.params.id || req.body.itemId;
+            if (!checklistItemId) {
+                throw new BadRequestError('Checklist Item ID is required');
+            }
+            const checklistItem = await checklistItemRepository.findById(checklistItemId);
+            if (!checklistItem) {
+                throw new BadRequestError(`Checklist Item with ID ${checklistItemId} not found`);
+            }
+            const checklistId = checklistItem.checklistId;
+            const checklist = await checklistRepository.getChecklistById(checklistId);
+            if (!checklist) {
+                throw new BadRequestError(`Checklist with ID ${checklistId} not found`);
+            }
+            const cardId = checklist.cardId;
+            const card = await cardRepository.getCardById(cardId);
+            if (!card) {
+                throw new BadRequestError(`Card with ID ${cardId} not found`);
+            }
+            const boardId = card.boardId;
+            const hasPermission = await authorizationHelper.canAccessBoard(
+                userId,
+                boardId,
+                requiredPermission
+            )
+            if (!hasPermission) {
+                throw new ForbiddenError('You do not have permission to access this board');
+            }
+            next();
+        }
+        catch (error) {
+            console.error('Error in ChecklistItemPermission middleware:', error);
             next(error)
         }
     }

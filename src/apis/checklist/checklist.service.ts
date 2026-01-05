@@ -8,10 +8,12 @@ export default class ChecklistService {
     constructor(
         private readonly checklistRepository: IChecklistRepository,
         private dataSource: DataSource
-    ) {}
-
+    ) { }
+    getChecklistsByCardId = async (cardId: string): Promise<ChecklistResponse[]> => {
+        const checklists = await this.checklistRepository.getChecklistsByCardId(cardId);
+        return checklists.map(toChecklistResponse);
+    }
     createChecklist = async (cardId: string, data: CreateChecklistSchema): Promise<ChecklistResponse> => {
-        console.log('Service already hit');
         let defaultPosition = POSITION_INCREMENT.toString();
         const currentChecklists = await this.checklistRepository.getChecklistsByCardId(cardId);
         if (currentChecklists.length > 0) {

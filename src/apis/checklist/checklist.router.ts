@@ -7,19 +7,30 @@ import { PERMISSIONS } from "@/common/constants/permissions";
 
 export default function checklistRouter(checklistController: ChecklistController): Router {
     const router = Router();
-    
-    router.patch('/:checklistId/reorder', 
+
+    router.get('/:checklistId/items',
+        asyncHandler(checkAuthentication),
+        asyncHandler(checkChecklistPermission(PERMISSIONS.CARD_VIEW)),
+        asyncHandler(checklistController.getChecklistItemsByChecklistId)
+    )
+    router.patch('/:checklistId/reorder',
         asyncHandler(checkAuthentication),
         asyncHandler(checkChecklistPermission(PERMISSIONS.CARD_UPDATE)),
         asyncHandler(checklistController.reorderChecklist));
+
+    router.post('/:checklistId/items',
+        asyncHandler(checkAuthentication),
+        asyncHandler(checkChecklistPermission(PERMISSIONS.CARD_UPDATE)),
+        asyncHandler(checklistController.createChecklistItem));
+
     router.patch('/:checklistId',
         asyncHandler(checkAuthentication),
-        asyncHandler(checkChecklistPermission(PERMISSIONS.CARD_UPDATE)), 
+        asyncHandler(checkChecklistPermission(PERMISSIONS.CARD_UPDATE)),
         asyncHandler(checklistController.updateChecklist));
     router.delete('/:checklistId',
         asyncHandler(checkAuthentication),
-        asyncHandler(checkChecklistPermission(PERMISSIONS.CARD_UPDATE)), 
+        asyncHandler(checkChecklistPermission(PERMISSIONS.CARD_UPDATE)),
         asyncHandler(checklistController.deleteChecklist));
-    
+
     return router;
 }
