@@ -8,10 +8,11 @@ import { listRegistry } from "@/apis/list/list.openapi";
 import { userRegistry } from "@/apis/user/user.openapi";
 import { workspaceRegistry } from "@/apis/workspace/workspace.openapi";
 import { checklistItemRegistry } from "@/apis/checklist-item/checklist-item.openapi";
+import { attachmentRegistry } from "@/apis/attachment/attachment.openapi";
 import { OpenApiGeneratorV3, OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 
 export function generateOpenAPIDocument(): ReturnType<InstanceType<typeof OpenApiGeneratorV3>['generateDocument']> {
-    const registry = new OpenAPIRegistry([userRegistry, healthCheckRegistry, authRegistry, workspaceRegistry, boardRegistry, joinLinkRegistry, listRegistry, cardRegistry, checklistRegistry, checklistItemRegistry])
+    const registry = new OpenAPIRegistry([userRegistry, healthCheckRegistry, authRegistry, workspaceRegistry, boardRegistry, joinLinkRegistry, listRegistry, cardRegistry, checklistRegistry, checklistItemRegistry, attachmentRegistry])
     registry.registerComponent('securitySchemes', 'bearerAuth', {
         type: 'http',
         scheme: 'bearer',
