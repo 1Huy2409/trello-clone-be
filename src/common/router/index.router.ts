@@ -75,6 +75,12 @@ import ChecklistItemService from '@/apis/checklist-item/checklist-item.service'
 import ChecklistItemController from '@/apis/checklist-item/checklist-item.controller'
 import checklistItemRouter from '@/apis/checklist-item/checklist-item.router'
 import { registerChecklistItemPaths } from '@/apis/checklist-item/checklist-item.openapi'
+import { Attachment } from '@/common/entities/attachment.entity';
+import { AttachmentRepository } from '@/apis/attachment/repositories/attachment.repository';
+import AttachmentService from '@/apis/attachment/attachment.service';
+import AttachmentController from '@/apis/attachment/attachment.controller';
+import attachmentRouter from '@/apis/attachment/attachment.router';
+import { registerAttachmentPaths } from '@/apis/attachment/attachment.openapi'
 
 const mainRouter: Router = express.Router()
 const initHealthCheckModule = () => {
@@ -263,6 +269,18 @@ const initActivityModule = () => {
     const activitySubscriber = new ActivitySubscriber(activityRepository);
     activitySubscriber.init();
 }
+
+const initAttachmentModule = () => {
+    const attachmentOrmRepo = AppDataSource.getRepository(Attachment);
+    const attachmentRepository = new AttachmentRepository(attachmentOrmRepo);
+    const cardOrmRepo = AppDataSource.getRepository(Card);
+    const cardRepository = new CardRepository(cardOrmRepo);
+    const attachmentService = new AttachmentService(attachmentRepository, cardRepository);
+    const attachmentController = new AttachmentController(attachmentService);
+    registerAttachmentPaths();
+    mainRouter.use('/attachments', attachmentRouter(attachmentController));
+}
+
 initHealthCheckModule();
 initAuthModule();
 initUserModule();
@@ -274,4 +292,6 @@ initCardModule();
 initChecklistModule();
 initChecklistItemModule();
 initActivityModule();
+initAttachmentModule();
+
 export default mainRouter;
