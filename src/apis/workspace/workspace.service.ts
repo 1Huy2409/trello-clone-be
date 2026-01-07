@@ -4,9 +4,7 @@ import { ConflictRequestError, NotFoundError } from "@/common/handler/error.resp
 import { CreateWorkspaceSchema, UpdateWorkspaceSchema, WorkspaceMemberResponse, WorkspaceResponse } from "./schemas";
 import { toWorkspaceResponse } from "./mapper/workspace.mapper";
 import { WorkspaceMember } from "@/common/entities/workspace-member.entity";
-import { BoardVisibility, BoardStatus } from '@/common/entities/board.entity';
-import { BoardResponse, CreateBoardSchema } from '../board/schemas';
-import { toBoardResponse } from '../board/mapper/board.mapper';
+import { BoardStatus } from '@/common/entities/board.entity';
 import { RoleScope } from '@/common/entities/role.entity';
 import { IWorkspaceRepository } from './repositories/workspace.repository.interface';
 import { IWorkspaceMemberRepository } from './repositories/workspace-member.repository.interface';
@@ -19,7 +17,6 @@ export default class WorkspaceService {
     constructor(
         private workspaceRepository: IWorkspaceRepository,
         private workspaceMemberRespository: IWorkspaceMemberRepository,
-        private boardRepository: IBoardRepository,
         private roleRepository: IRoleRepository,
         private rbacService: RbacService
     ) { }

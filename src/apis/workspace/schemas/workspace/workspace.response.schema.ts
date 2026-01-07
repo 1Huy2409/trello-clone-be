@@ -1,8 +1,6 @@
 import { z } from 'zod';
 import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
 import { WorkspaceStatus } from '@/common/entities/workspace.entity';
-import { ListBoardResponseSchema } from '@/apis/board/schemas';
-import { ListWorkspaceMemberResponseSchema } from '../workspace-member/workspace-member.response.schema';
 extendZodWithOpenApi(z);
 
 export const WorkspaceResponseSchema = z.object({
@@ -12,8 +10,6 @@ export const WorkspaceResponseSchema = z.object({
     visibility: z.boolean().openapi({ example: true }),
     status: z.enum(WorkspaceStatus).openapi({ example: WorkspaceStatus.ACTIVE }),
     ownerName: z.string().openapi({ example: 'John Doe' }),
-    boards: ListBoardResponseSchema.optional(),
-    workspaceMembers: ListWorkspaceMemberResponseSchema.optional(),
     created_at: z.date(),
     updated_at: z.date()
 })
