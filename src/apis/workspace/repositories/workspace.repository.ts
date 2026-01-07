@@ -11,16 +11,16 @@ export class WorkspaceRepository implements IWorkspaceRepository {
     async findAll(): Promise<Workspace[]> {
         return this.workspaceRepository.find({
             where: { isActive: true },
-            relations: ['owner', 'workspaceMembers', 'boards'],
+            relations: ['owner'],
         });
     }
 
     async findByName(name: string, ownerId: string): Promise<Workspace | null> {
-        return await this.workspaceRepository.findOne({ where: { title: name, ownerId }, relations: ['owner', 'workspaceMembers', 'boards', 'workspaceMembers.user', 'workspaceMembers.role'] });
+        return await this.workspaceRepository.findOne({ where: { title: name, ownerId }, relations: ['owner'] });
     }
 
     async findByOwnerId(ownerId: string): Promise<Workspace[]> {
-        return this.workspaceRepository.find({ where: { ownerId: ownerId, isActive: true }, relations: ['owner', 'workspaceMembers', 'boards', 'workspaceMembers.user', 'workspaceMembers.role'] });
+        return this.workspaceRepository.find({ where: { ownerId: ownerId, isActive: true }, relations: ['owner'] });
     }
     async findOneByOwnerId(id: string, ownerId: string): Promise<Workspace | null> {
         return this.workspaceRepository.findOne({ where: { id, ownerId, isActive: true }, relations: ['owner', 'workspaceMembers', 'boards', 'workspaceMembers.user', 'workspaceMembers.role'] });
@@ -31,10 +31,7 @@ export class WorkspaceRepository implements IWorkspaceRepository {
             .createQueryBuilder('workspace')
             .innerJoin('workspace.workspaceMembers', 'workspaceMember')
             .leftJoinAndSelect('workspace.owner', 'owner')
-            .leftJoinAndSelect('workspace.workspaceMembers', 'workspaceMembers')
-            .leftJoinAndSelect('workspaceMembers.user', 'user')
-            .leftJoinAndSelect('workspaceMembers.role', 'role')
-            .leftJoinAndSelect('workspace.boards', 'boards')
+
             .where('workspaceMember.userId = :userId', { userId })
             .andWhere('workspace.isActive = :isActive', { isActive: true })
             .andWhere('workspace.status = :status', { status: WorkspaceStatus.ACTIVE })
@@ -46,10 +43,7 @@ export class WorkspaceRepository implements IWorkspaceRepository {
             .createQueryBuilder('workspace')
             .innerJoin('workspace.workspaceMembers', 'workspaceMember')
             .leftJoinAndSelect('workspace.owner', 'owner')
-            .leftJoinAndSelect('workspace.workspaceMembers', 'workspaceMembers')
-            .leftJoinAndSelect('workspaceMembers.user', 'user')
-            .leftJoinAndSelect('workspaceMembers.role', 'role')
-            .leftJoinAndSelect('workspace.boards', 'boards')
+
             .where('workspaceMember.userId = :userId', { userId })
             .andWhere('workspace.isActive = :isActive', { isActive: true })
             .andWhere('workspace.status = :status', { status: WorkspaceStatus.ARCHIVED })

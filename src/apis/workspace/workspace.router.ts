@@ -2,7 +2,7 @@ import { Router } from "express";
 import WorkspaceController from "./workspace.controller";
 import { asyncHandler } from "@/common/middleware/asyncHandler";
 import { PERMISSIONS } from "@/common/constants/permissions";
-import { checkBoardPermission, checkWorkspacePermission } from "@/common/middleware/authorization";
+import { checkWorkspacePermission } from "@/common/middleware/authorization";
 import { checkAuthentication } from "@/common/middleware/authentication";
 import { performanceLogger } from "@/common/middleware/performanceLogger";
 
