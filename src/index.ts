@@ -17,7 +17,7 @@ import cookieParser from "cookie-parser";
 const port = parseInt(process.env.PORT || '4000');
 const app: Express = express();
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://localhost:4000', `http://localhost:${port}`],
+    origin: ['http://localhost:5174', 'http://localhost:5173', 'http://localhost:4000', `http://localhost:${port}`],
     credentials: true
 }))
 // app.use(cors())
