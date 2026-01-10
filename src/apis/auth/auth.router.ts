@@ -24,6 +24,7 @@ export default function authRouter(authController: AuthController): Router {
     )
     // end google oauth
     router.post('/register', asyncHandler(authController.requestOTP))
+    router.post('/resend-otp', asyncHandler(authController.resendOTP))
     // Forgot password flow
     router.post('/forgot-password/request', asyncHandler(authController.requestForgotPassword))
     router.post('/forgot-password/verify', asyncHandler(authController.verifyForgotOTP))

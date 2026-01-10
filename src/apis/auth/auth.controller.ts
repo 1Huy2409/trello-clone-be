@@ -67,6 +67,19 @@ export default class AuthController {
         );
         return handleServiceResponse(serviceResponse, res);
     }
+
+    resendOTP = async (req: Request, res: Response) => {
+        const data: RequestOTPForm = req.body;
+        const result = await this.authService.resendOTP(data.email);
+        const serviceResponse = new ServiceResponse(
+            ResponseStatus.Sucess,
+            result.message,
+            { email: result.email },
+            StatusCodes.OK
+        );
+        return handleServiceResponse(serviceResponse, res);
+    }
+
     verifyOTP = async (req: Request, res: Response) => {
         const data: VerifyOTPForm = req.body;
         const result = await this.authService.verifyEmail(data);
