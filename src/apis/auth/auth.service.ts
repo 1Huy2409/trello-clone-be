@@ -1,15 +1,13 @@
 import { redisCache, redisStream } from '@/config/redis.config';
 import { toUserResponse } from '../user/mapper/user.mapper';
-import { CompleteRegisterForm, PostRegisterSchema, RegisterForm, RequestOTPForm, RequestOTPResponse, VerifyOTPForm, ResetPasswordForm, ResetPasswordFormHaveLoggedIn } from './schemas/auth.schema';
+import { RegisterForm, RequestOTPForm, RequestOTPResponse, VerifyOTPForm, ResetPasswordForm, ResetPasswordFormHaveLoggedIn } from './schemas/auth.schema';
 import { User } from "@/common/entities/user.entity";
 import { AuthFailureError, BadRequestError, ConflictRequestError, NotFoundError } from "@/common/handler/error.response";;
 import { comparePassword, hashPassword } from "@/common/utils/handlePassword";
-import { signAccessToken, signRefreshToken, verifyAccessToken, verifyRefreshToken } from "@/common/utils/auth.util";
-import crypto from 'crypto';
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from "@/common/utils/auth.util";
 import { UserResponse } from '../user/schemas';
 import { Request } from 'express';
 import { EmailService } from '@/common/utils/mailService';
-
 import { IUserRepository } from '../user/repositories/user.repository.interface';
 import { OtpService } from '@/common/utils/otpService';
 import { EMAIL_STREAM } from '@/common/constants/redis';
@@ -18,10 +16,8 @@ interface OtpRedisData {
     isVerified: boolean;
 }
 export default class AuthService {
-    private emailService: EmailService
     private otpService: OtpService
     constructor(private userRepository: IUserRepository) {
-        this.emailService = new EmailService();
         this.otpService = new OtpService()
     }
 
@@ -31,6 +27,9 @@ export default class AuthService {
         const user = await this.userRepository.findByUsername(username);
         if (!user) {
             throw new AuthFailureError(`Username ${username} is not found!`)
+        }
+        if (!user.isVerified) {
+            throw new AuthFailureError(`Your email account is not verified!`)
         }
         console.log('User found for login:', user);
         // call compare password
@@ -48,15 +47,9 @@ export default class AuthService {
         const { fullname, username, email, password } = userData;
         const existingUserByEmail = await this.userRepository.findByEmail(email);
         if (existingUserByEmail) {
-            if (existingUserByEmail.isVerified) {
-                throw new ConflictRequestError(`Email ${email} is already in use.`);
-            }
-            const canResendOtp = await this.otpService.canResendOTP(email);
-            if (!canResendOtp) {
-                throw new BadRequestError('OTP was sent recently. Please wait before requesting a new one.');
-            }
+            throw new ConflictRequestError(`Email ${email} is already in use.`);
         }
-        const existingUserByUsername = await this.userRepository.findByUsernameExceptId(username, existingUserByEmail ? existingUserByEmail.id : '');
+        const existingUserByUsername = await this.userRepository.findByUsername(username);
         if (existingUserByUsername) {
             throw new ConflictRequestError(`Username ${username} is already in use.`);
         }

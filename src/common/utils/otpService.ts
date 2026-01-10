@@ -13,7 +13,9 @@ export class OtpService {
 
     async saveOTP(email: string, otp: string): Promise<void> {
         const otpKey = `otp:register:${email}`;
+        const attemptsKey = `otp:attempts:${email}`;
         await redisCache.setex(otpKey, this.OTP_EXPIRATION, otp);
+        await redisCache.del(attemptsKey);
     }
 
     async verifyOTP(email: string, otp: string): Promise<boolean> {
