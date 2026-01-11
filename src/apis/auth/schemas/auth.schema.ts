@@ -59,7 +59,7 @@ export const VerifyOTPSchema = z.object({
     otp: z.string().length(6)
 });
 
- export const VerifyOTPResponseSchema = z.object({
+export const VerifyOTPResponseSchema = z.object({
     email: z.email(),
     message: z.string()
 });
@@ -99,7 +99,6 @@ export const ResetPasswordSchema = z.object({
     email: z.email(),
     newPassword: z.string().min(8).max(255).regex(PASSWORD_REGEX, PASSWORD_MESSAGE).openapi({ example: 'P@ssw0rd!' })
 });
-
 export const PostResetPassword = {
     content: {
         'application/json': {
@@ -108,6 +107,20 @@ export const PostResetPassword = {
     }
 };
 
+export const ChangePasswordSchema = z.object({
+    currentPassword: z.string().min(6).max(255).regex(PASSWORD_REGEX, PASSWORD_MESSAGE),
+    newPassword: z.string().min(8).max(255).regex(PASSWORD_REGEX, PASSWORD_MESSAGE),
+    confirmNewPassword: z.string().min(8).max(255).regex(PASSWORD_REGEX, PASSWORD_MESSAGE),
+})
+export const ChangePasswordRequest: ZodRequestBody = {
+    description: 'Change password form',
+    content: {
+        'application/json': {
+            schema: ChangePasswordSchema
+        }
+    }
+}
+export type ChangePasswordForm = z.infer<typeof ChangePasswordSchema>;
 export type ResetPasswordForm = z.infer<typeof ResetPasswordSchema>;
 
 export const ResetPasswordSchemaHaveLoggedIn = z.object({

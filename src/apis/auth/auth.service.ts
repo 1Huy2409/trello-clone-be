@@ -1,6 +1,6 @@
 import { redisCache, redisStream } from '@/config/redis.config';
 import { toUserResponse } from '../user/mapper/user.mapper';
-import { RegisterForm, RequestOTPForm, RequestOTPResponse, VerifyOTPForm, ResetPasswordForm, ResetPasswordFormHaveLoggedIn } from './schemas/auth.schema';
+import { RegisterForm, RequestOTPForm, RequestOTPResponse, VerifyOTPForm, ResetPasswordForm, ResetPasswordFormHaveLoggedIn, ChangePasswordForm } from './schemas/auth.schema';
 import { User } from "@/common/entities/user.entity";
 import { AuthFailureError, BadRequestError, ConflictRequestError, NotFoundError } from "@/common/handler/error.response";;
 import { comparePassword, hashPassword } from "@/common/utils/handlePassword";
@@ -223,6 +223,31 @@ export default class AuthService {
         return {
             message: 'Password has been reset successfully.',
             email,
+            user: toUserResponse(updatedUser)
+        }
+    }
+
+    changePassword = async (data: ChangePasswordForm, userId: string): Promise<{ message: string, email: string, user: UserResponse }> => {
+        const { currentPassword, newPassword, confirmNewPassword } = data;
+
+        if (newPassword !== confirmNewPassword) {
+            throw new BadRequestError('New password and confirm password do not match.');
+        }
+
+        const user = await this.userRepository.findById(userId);
+        if (!user) throw new NotFoundError('User not found!');
+
+        const isCurrentPasswordValid = await comparePassword(currentPassword, user.password);
+        if (!isCurrentPasswordValid) {
+            throw new BadRequestError('Current password is incorrect.');
+        }
+
+        user.password = await hashPassword(newPassword);
+        const updatedUser = await this.userRepository.update(user.id, user);
+
+        return {
+            message: 'Password has been changed successfully.',
+            email: user.email,
             user: toUserResponse(updatedUser)
         }
     }

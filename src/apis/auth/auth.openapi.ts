@@ -1,5 +1,5 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
-import { LoginResponseSchema, PostLogin, PostRegister, PostRequestOTP, PostResetPassword, PostResetPasswordHaveLoggedIn, PostVerifyOTP, RequestOTPResponseSchema, ResetPasswordResponseSchema, VerifyOTPResponseSchema } from "./schemas/auth.schema";
+import { LoginResponseSchema, PostLogin, PostRegister, PostRequestOTP, PostResetPassword, PostResetPasswordHaveLoggedIn, PostVerifyOTP, RequestOTPResponseSchema, ResetPasswordResponseSchema, VerifyOTPResponseSchema, ChangePasswordRequest } from "./schemas/auth.schema";
 import { createApiResponse } from "@/api-docs/openAPIResponseBuilder";
 import z from "zod";
 
@@ -74,5 +74,13 @@ export function registerAuthPaths() {
         tags: ['Auth'],
         security: [{ bearerAuth: [] }],
         responses: createApiResponse(z.object({ valid: z.boolean() }), 'Success')
+    })
+    authRegistry.registerPath({
+        method: 'post',
+        path: '/api/v1/auth/change-password',
+        tags: ['Auth'],
+        security: [{ bearerAuth: [] }],
+        request: { body: ChangePasswordRequest },
+        responses: createApiResponse(ResetPasswordResponseSchema, 'Success')
     })
 }

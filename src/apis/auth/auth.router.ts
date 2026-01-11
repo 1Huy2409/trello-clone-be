@@ -40,5 +40,6 @@ export default function authRouter(authController: AuthController): Router {
         asyncHandler(authController.verifyToken)
     )
     router.post('/reset', asyncHandler(checkAuthentication), asyncHandler(authController.resetPasswordHaveLoggedIn))
+    router.post('/change-password', asyncHandler(checkAuthentication), asyncHandler(authController.changePassword))
     return router
 }

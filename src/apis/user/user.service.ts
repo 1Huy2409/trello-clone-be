@@ -4,7 +4,7 @@ import { User } from "@/common/entities/user.entity";
 import { BadRequestError, NotFoundError } from "@/common/handler/error.response";
 import { toUserResponse } from "./mapper/user.mapper";
 import { IUserRepository } from "./repositories/user.repository.interface";
-import { uploadImageBuffer } from "@/common/services/cloudinary.service";
+import { uploadFile } from "@/common/services/cloudinary.service";
 
 export default class UserService {
     constructor(
@@ -55,7 +55,7 @@ export default class UserService {
             throw new BadRequestError('Avatar file is required');
         }
 
-        const result = await uploadImageBuffer(file, { folder: 'avatars', public_id: `user-${id}`, overwrite: true });
+        const result = await uploadFile(file, { folder: 'avatars', public_id: `user-${id}`, overwrite: true });
         const updated = await this.userRepository.update(id, { avatarUrl: result.secure_url });
         return toUserResponse(updated);
     }

@@ -4,7 +4,7 @@ import { handleServiceResponse } from "@/common/utils/httpHandler";
 import { ResponseStatus, ServiceResponse } from "@/common/models/service.response";
 import { StatusCodes } from "http-status-codes";
 import { User } from "@/common/entities/user.entity";
-import { RegisterForm, RequestOTPForm, VerifyOTPForm, ResetPasswordForm, ResetPasswordFormHaveLoggedIn } from "./schemas/auth.schema";
+import { RegisterForm, RequestOTPForm, VerifyOTPForm, ResetPasswordForm, ResetPasswordFormHaveLoggedIn, ChangePasswordForm } from "./schemas/auth.schema";
 import { AuthFailureError } from '@/common/handler/error.response';
 
 export default class AuthController {
@@ -179,6 +179,19 @@ export default class AuthController {
     resetPasswordHaveLoggedIn = async (req: Request, res: Response) => {
         const data: ResetPasswordFormHaveLoggedIn = req.body;
         const result = await this.authService.resetPasswordHaveLoggedIn(data);
+        const serviceResponse = new ServiceResponse(
+            ResponseStatus.Sucess,
+            result.message,
+            { email: result.email, user: result.user },
+            StatusCodes.OK
+        );
+        return handleServiceResponse(serviceResponse, res);
+    }
+
+    changePassword = async (req: Request, res: Response) => {
+        const data: ChangePasswordForm = req.body;
+        const userId = (req.user as User).id;
+        const result = await this.authService.changePassword(data, userId);
         const serviceResponse = new ServiceResponse(
             ResponseStatus.Sucess,
             result.message,
