@@ -13,18 +13,13 @@ export function registerWorkspacePaths() {
         path: '/api/v1/workspaces',
         tags: ['Workspace'],
         security: [{ bearerAuth: [] }],
-        parameters: [
-            {
-                name: 'status',
-                in: 'query',
-                required: false,
-                schema: {
-                    type: 'string',
-                    enum: ['active', 'archived']
-                },
-                description: 'Filter workspace by status'
-            }
-        ],
+        responses: createApiResponse(ListWorkspaceResponseSchema, 'Success')
+    });
+    workspaceRegistry.registerPath({
+        method: 'get',
+        path: '/api/v1/workspaces/archived',
+        tags: ['Workspace'],
+        security: [{ bearerAuth: [] }],
         responses: createApiResponse(ListWorkspaceResponseSchema, 'Success')
     });
     workspaceRegistry.registerPath({

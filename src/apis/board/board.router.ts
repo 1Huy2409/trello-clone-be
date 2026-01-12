@@ -26,6 +26,11 @@ export default function boardRouter(boardController: BoardController): Router {
         asyncHandler(checkBoardPermission(PERMISSIONS.LIST_VIEW)),
         asyncHandler(boardController.getListsByBoardId)
     )
+    router.get('/:boardId',
+        asyncHandler(checkAuthentication),
+        asyncHandler(checkBoardPermission(PERMISSIONS.BOARD_VIEW)),
+        asyncHandler(boardController.getBoardById)
+    )
 
     router.post('/',
         asyncHandler(checkAuthentication),

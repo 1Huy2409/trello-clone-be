@@ -128,12 +128,12 @@ export default class WorkspaceService {
             throw new NotFoundError(`Workspace with id ${id} not found or you are not the owner`);
         }
         // update status
-        workspace.isActive = false;
-        workspace.boards.forEach(board => {
-            board.isActive = false;
-            board.status = BoardStatus.ARCHIVED;
-        });
-        await this.workspaceRepository.update(id, workspace);
+        // workspace.isActive = false;
+        // workspace.boards.forEach(board => {
+        //     board.isActive = false;
+        //     board.status = BoardStatus.ARCHIVED;
+        // });
+        await this.workspaceRepository.delete(id);
         await this.rbacService.onWorkspaceDeleted(id);
         return {
             message: 'Delete workspace successfully!'

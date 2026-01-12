@@ -71,7 +71,6 @@ export class WorkspaceRepository implements IWorkspaceRepository {
         if (!workspace) {
             throw new NotFoundError(`Workspace with ID ${id} not found`);
         }
-        workspace.isActive = false;
-        return await this.workspaceRepository.save(workspace);
+        return await this.workspaceRepository.remove(workspace);
     }
 }

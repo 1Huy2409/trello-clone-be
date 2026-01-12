@@ -33,6 +33,13 @@ export default class BoardService {
         const boards = await this.boardRepository.findBoardsByWorkspaceId(workspaceId);
         return boards.map(toBoardResponse);
     }
+    getBoardById = async (boardId: string): Promise<BoardResponse> => {
+        const board = await this.boardRepository.findById(boardId);
+        if (!board) {
+            throw new NotFoundError(`Board with ID ${boardId} not found`);
+        }
+        return toBoardResponse(board);
+    }
     createBoard = async (workspaceId: string, data: CreateBoardSchema, creatorId: string): Promise<BoardResponse> => {
         const workspace = await this.workspaceRepository.findById(workspaceId);
         if (!workspace) {

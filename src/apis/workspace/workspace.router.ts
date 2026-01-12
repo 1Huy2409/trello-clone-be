@@ -14,6 +14,10 @@ export default function workspaceRouter(workspaceController: WorkspaceController
         asyncHandler(checkAuthentication),
         asyncHandler(workspaceController.findAll)
     )
+    router.get('/archived',
+        asyncHandler(checkAuthentication),
+        asyncHandler(workspaceController.findArchiveWorkspaces)
+    )
     router.get('/:id/boards',
         asyncHandler(checkAuthentication),
         asyncHandler(checkWorkspacePermission(PERMISSIONS.BOARD_VIEW)),

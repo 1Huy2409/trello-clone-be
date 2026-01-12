@@ -19,15 +19,28 @@ export default class WorkspaceController {
     ) { }
 
     findAll = async (req: Request, res: Response) => {
-        const { status } = req.query;
         const userId = req.user?.id;
         if (!userId) {
             throw new AuthFailureError('Authentication failure');
         }
-        const workspaces = status === 'archived' ? await this.workspaceService.findAllArchived(userId) : await this.workspaceService.findAll(userId);
+        const workspaces = await this.workspaceService.findAll(userId);
         const serviceResponse = new ServiceResponse(
             ResponseStatus.Sucess,
             'Get all workspaces successfully',
+            workspaces,
+            StatusCodes.OK
+        )
+        return handleServiceResponse(serviceResponse, res);
+    }
+    findArchiveWorkspaces = async (req: Request, res: Response) => {
+        const userId = req.user?.id;
+        if (!userId) {
+            throw new AuthFailureError('Authentication failure');
+        }
+        const workspaces = await this.workspaceService.findAllArchived(userId);
+        const serviceResponse = new ServiceResponse(
+            ResponseStatus.Sucess,
+            'Get all archived workspaces successfully',
             workspaces,
             StatusCodes.OK
         )

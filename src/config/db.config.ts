@@ -30,7 +30,7 @@ export const AppDataSource = new DataSource({
     database: process.env.POSTGRES_DB || 'postgres_database',
     connectTimeoutMS: 10000,
     synchronize: true,
-    logging: true,
+    logging: false,
     entities: [User, Workspace, WorkspaceMember, Notification, List, Comment, Card, CardMember, Board, BoardMember, BoardJoinLink, Role, Permission, RolePermission, WorkspaceJoinLink, Activity, Checklist, ChecklistItem, Attachment],
     migrations: [path.join(__dirname, '../common/migrations/*.{ts,js}')],
     migrationsRun: false

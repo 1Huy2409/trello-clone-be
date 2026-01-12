@@ -13,6 +13,20 @@ export default class BoardController {
         private boardService: BoardService,
         private listService: ListService
     ) { }
+    getBoardById = async (req: Request, res: Response) => {
+        const { boardId } = req.params;
+        if (!boardId) {
+            throw new BadRequestError('Board id is required');
+        }
+        const board = await this.boardService.getBoardById(boardId);
+        const serviceResponse = new ServiceResponse(
+            ResponseStatus.Sucess,
+            'Get board by ID successfully',
+            board,
+            StatusCodes.OK
+        )
+        return handleServiceResponse(serviceResponse, res);
+    }
     createBoard = async (req: Request, res: Response) => {
         const userId = req.user?.id;
         if (!userId) {
