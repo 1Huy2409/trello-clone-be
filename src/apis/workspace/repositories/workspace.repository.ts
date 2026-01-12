@@ -12,18 +12,19 @@ export class WorkspaceRepository implements IWorkspaceRepository {
         return this.workspaceRepository.find({
             where: { isActive: true },
             relations: ['owner'],
+            order: { created_at: 'ASC' }
         });
     }
 
     async findByName(name: string, ownerId: string): Promise<Workspace | null> {
-        return await this.workspaceRepository.findOne({ where: { title: name, ownerId }, relations: ['owner'] });
+        return await this.workspaceRepository.findOne({ where: { title: name, ownerId }, relations: ['owner'], order: { created_at: 'ASC' } });
     }
 
     async findByOwnerId(ownerId: string): Promise<Workspace[]> {
-        return this.workspaceRepository.find({ where: { ownerId: ownerId, isActive: true }, relations: ['owner'] });
+        return this.workspaceRepository.find({ where: { ownerId: ownerId, isActive: true }, relations: ['owner'], order: { created_at: 'ASC' } });
     }
     async findOneByOwnerId(id: string, ownerId: string): Promise<Workspace | null> {
-        return this.workspaceRepository.findOne({ where: { id, ownerId, isActive: true }, relations: ['owner', 'workspaceMembers', 'boards', 'workspaceMembers.user', 'workspaceMembers.role'] });
+        return this.workspaceRepository.findOne({ where: { id, ownerId, isActive: true }, relations: ['owner', 'workspaceMembers', 'boards', 'workspaceMembers.user', 'workspaceMembers.role'], order: { created_at: 'DESC' } });
     }
 
     async findByUserId(userId: string): Promise<Workspace[]> {
@@ -35,7 +36,7 @@ export class WorkspaceRepository implements IWorkspaceRepository {
             .where('workspaceMember.userId = :userId', { userId })
             .andWhere('workspace.isActive = :isActive', { isActive: true })
             .andWhere('workspace.status = :status', { status: WorkspaceStatus.ACTIVE })
-            .orderBy('workspace.created_at', 'DESC')
+            .orderBy('workspace.created_at', 'ASC')
             .getMany();
     }
     async findArchivedByOwnerId(userId: string): Promise<Workspace[]> {
@@ -47,7 +48,7 @@ export class WorkspaceRepository implements IWorkspaceRepository {
             .where('workspaceMember.userId = :userId', { userId })
             .andWhere('workspace.isActive = :isActive', { isActive: true })
             .andWhere('workspace.status = :status', { status: WorkspaceStatus.ARCHIVED })
-            .orderBy('workspace.created_at', 'DESC')
+            .orderBy('workspace.created_at', 'ASC')
             .getMany();
     }
 

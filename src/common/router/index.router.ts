@@ -81,6 +81,10 @@ import AttachmentService from '@/apis/attachment/attachment.service';
 import AttachmentController from '@/apis/attachment/attachment.controller';
 import attachmentRouter from '@/apis/attachment/attachment.router';
 import { registerAttachmentPaths } from '@/apis/attachment/attachment.openapi'
+import { PermissionService } from '@/apis/permission/permission.service';
+import { PermissionController } from '@/apis/permission/permission.controller';
+import permissionRouter from '@/apis/permission/permission.router';
+import { registerPermissionPaths } from '@/apis/permission/permission.openapi';
 
 const mainRouter: Router = express.Router()
 const initHealthCheckModule = () => {
@@ -126,7 +130,7 @@ const initWorkspaceModule = () => {
     const userOrmRepo = AppDataSource.getRepository(User);
     const userRepository = new UserRepository(userOrmRepo);
     const rbacService = new RbacService();
-    const workspaceService = new WorkspaceService(workspaceRepository, workspaceMemberRepository, boardRepository, roleRepository, rbacService);
+    const workspaceService = new WorkspaceService(workspaceRepository, workspaceMemberRepository, roleRepository, rbacService);
     const workspaceRoleService = new WorkspaceRoleService(roleRepository, permissionRepository, rolePermissionRepository, rbacService);
     const boardService = new BoardService(boardRepository, workspaceRepository, boardJoinLinkRepository, boardMemberRepository, roleRepository, userRepository);
     const workspaceController = new WorkspaceController(workspaceService, boardService, workspaceRoleService);
@@ -281,6 +285,15 @@ const initAttachmentModule = () => {
     mainRouter.use('/attachments', attachmentRouter(attachmentController));
 }
 
+const initPermissionModule = () => {
+    const permissionOrmRepo = AppDataSource.getRepository(Permission);
+    const permissionRepository = new PermissionRepository(permissionOrmRepo);
+    const permissionService = new PermissionService(permissionRepository);
+    const permissionController = new PermissionController(permissionService);
+    registerPermissionPaths();
+    mainRouter.use('/permissions', permissionRouter(permissionController));
+}
+
 initHealthCheckModule();
 initAuthModule();
 initUserModule();
@@ -293,5 +306,6 @@ initChecklistModule();
 initChecklistItemModule();
 initActivityModule();
 initAttachmentModule();
+initPermissionModule();
 
 export default mainRouter;

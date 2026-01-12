@@ -22,6 +22,7 @@ export const toWorkspaceRoleResponse = (role: Role): WorkspaceRoleResponse => {
         isSystemRole: role.isSystemRole,
         workspaceId: role.workspaceId,
         permissions: role.rolePermissions?.map(rp => ({
+            id: rp.permission.id,
             action: rp.permission.action,
             description: rp.permission.description
         })) || []
