@@ -26,7 +26,7 @@ export class BoardMember extends DateTimeEntity {
     @JoinColumn({ name: 'userId' })
     user: User
 
-    @ManyToOne(() => Board, (board) => board.boardMembers)
+    @ManyToOne(() => Board, (board) => board.boardMembers, { onDelete: "CASCADE" })
     @JoinColumn({ name: 'boardId' })
     board: Board
 }

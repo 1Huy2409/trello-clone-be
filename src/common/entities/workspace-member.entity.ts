@@ -27,7 +27,7 @@ export class WorkspaceMember extends DateTimeEntity {
     @JoinColumn({ name: 'userId' })
     user: User
 
-    @ManyToOne(() => Workspace, (workspace) => workspace.workspaceMembers)
+    @ManyToOne(() => Workspace, (workspace) => workspace.workspaceMembers, { onDelete: "CASCADE" })
     @JoinColumn({ name: 'workspaceId' })
     workspace: Workspace
 
