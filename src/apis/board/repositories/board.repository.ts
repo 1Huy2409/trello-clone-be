@@ -66,8 +66,7 @@ export class BoardRepository implements IBoardRepository {
         if (!board) {
             throw new NotFoundError(`Board with ID ${id} not found`);
         }
-        board.status = BoardStatus.ARCHIVED;
-        await repo.save(board);
+        await repo.remove(board);
         return {
             message: 'Board deleted successfully'
         }
