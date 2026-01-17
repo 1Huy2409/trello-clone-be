@@ -29,11 +29,14 @@ export class BoardRepository implements IBoardRepository {
         });
     }
 
-    async findBoardsByWorkspaceId(workspaceId: string, manager?: EntityManager): Promise<Board[]> {
+    async findBoardsByWorkspaceId(workspaceId: string, userId: string, manager?: EntityManager): Promise<Board[]> {
         const repo = manager ? manager.getRepository(Board) : this.boardRepository;
-        return await repo.find({
-            where: { workspaceId: workspaceId, status: BoardStatus.ACTIVE }
-        });
+        return await repo.createQueryBuilder('board')
+            .innerJoin('board.boardMembers', 'member')
+            .where('board.workspaceId = :workspaceId', { workspaceId })
+            .andWhere('member.userId = :userId', { userId })
+            .andWhere('board.status = :status', { status: BoardStatus.ACTIVE })
+            .getMany();
     }
 
     async findBoardByWorkspaceId(id: string, workspaceId: string, manager?: EntityManager): Promise<Board | null> {
