@@ -29,8 +29,8 @@ export default class BoardService {
     ) {
         this.emailService = new EmailService();
     }
-    getAllBoardFromWorkspace = async (workspaceId: string): Promise<BoardResponse[]> => {
-        const boards = await this.boardRepository.findBoardsByWorkspaceId(workspaceId);
+    getAllBoardFromWorkspace = async (workspaceId: string, userId: string): Promise<BoardResponse[]> => {
+        const boards = await this.boardRepository.findBoardsByWorkspaceId(workspaceId, userId);
         return boards.map(toBoardResponse);
     }
     getBoardById = async (boardId: string): Promise<BoardResponse> => {

@@ -183,11 +183,17 @@ export default class WorkspaceController {
     }
     getAllBoardFromWorkspace = async (req: Request, res: Response) => {
         const { id } = req.params;
+        const userId = req.user?.id;
         console.log("Workspace ID:", id);
+
         if (!id) {
             throw new BadRequestError('Workspace id is required');
         }
-        const boards = await this.boardService.getAllBoardFromWorkspace(id);
+        if (!userId) {
+            throw new AuthFailureError('Authentication failure');
+        }
+
+        const boards = await this.boardService.getAllBoardFromWorkspace(id, userId);
         const serviceResponse = new ServiceResponse(
             ResponseStatus.Sucess,
             'Get all boards in workspace successfully',
