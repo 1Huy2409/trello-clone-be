@@ -15,6 +15,18 @@ export class CardRepository implements ICardRepository {
     async getActiveCardById(id: string): Promise<Card | null> {
         return await this.cardRepository.findOneBy({ id, isArchived: false });
     }
+    async getArchivedCardsByListId(listId: string): Promise<Card[]> {
+        return await this.cardRepository.find({
+            where: {
+                listId,
+                isArchived: true
+            },
+            order: { position: 'ASC' },
+            relations: {
+                cardMembers: true
+            }
+        });
+    }
     async getCardsByListId(listId: string): Promise<Card[]> {
         return await this.cardRepository.find({
             where: {

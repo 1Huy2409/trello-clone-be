@@ -30,6 +30,14 @@ export class ListRepository implements IListRepository {
             relations: ['cards']
         });
     }
+    async findArchivedListsByBoardId(boardId: string, manager?: EntityManager): Promise<List[]> {
+        const repo = manager ? manager.getRepository(List) : this.listRepository;
+        return await repo.find({
+            where: { boardId, isArchived: true },
+            relations: ['cards'],
+            order: { position: 'ASC' }
+        });
+    }
     async findListsSortedByPosition(boardId: string, manager?: EntityManager): Promise<List[]> {
         const repo = manager ? manager.getRepository(List) : this.listRepository;
         return await repo.find({

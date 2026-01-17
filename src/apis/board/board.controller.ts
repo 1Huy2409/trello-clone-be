@@ -275,6 +275,20 @@ export default class BoardController {
         )
         return handleServiceResponse(serviceResponse, res);
     }
+    getArchiveLists = async (req: Request, res: Response) => {
+        const { boardId } = req.params;
+        if (!boardId) {
+            throw new BadRequestError('Board id is required');
+        }
+        const lists = await this.listService.getArchivedLists(boardId);
+        const serviceResponse = new ServiceResponse(
+            ResponseStatus.Sucess,
+            'Get archive lists successfully',
+            lists,
+            StatusCodes.OK
+        )
+        return handleServiceResponse(serviceResponse, res);
+    }
     createList = async (req: Request, res: Response) => {
         console.log("Controller - createList called");
         const { boardId } = req.params;

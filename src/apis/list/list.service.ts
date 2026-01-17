@@ -19,6 +19,10 @@ export default class ListService {
         const lists = await this.listRepository.findListsByBoardId(boardId);
         return lists.map(toListResponse);
     }
+    getArchivedLists = async (boardId: string): Promise<ListResponse[]> => {
+        const lists = await this.listRepository.findArchivedListsByBoardId(boardId);
+        return lists.map(toListResponse);
+    }
     createList = async (data: CreateListSchema, boardId: string): Promise<ListResponse> => {
         let defaultPosition: string = POSITION_INCREMENT.toString();
         const currentLists = await this.listRepository.findListsSortedByPosition(boardId);

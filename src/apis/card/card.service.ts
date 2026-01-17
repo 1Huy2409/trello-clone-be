@@ -59,6 +59,10 @@ export default class CardService {
         const cards = await this.cardRepository.getCardsByListId(listId);
         return cards.map(card => toCardResponse(card));
     }
+    getArchivedCardsByListId = async (listId: string): Promise<CardResponse[]> => {
+        const cards = await this.cardRepository.getArchivedCardsByListId(listId);
+        return cards.map(card => toCardResponse(card));
+    }
     updateCard = async (id: string, data: UpdateCardSchema): Promise<CardResponse> => {
         const updateCard = await this.cardRepository.getActiveCardById(id);
         if (!updateCard) {

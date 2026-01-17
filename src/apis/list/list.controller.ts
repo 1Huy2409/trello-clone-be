@@ -121,4 +121,18 @@ export default class ListController {
         )
         return handleServiceResponse(serviceResponse, res);
     }
+    getArchiveCards = async (req: Request, res: Response) => {
+        const { listId } = req.params;
+        if (!listId) {
+            throw new BadRequestError('List id is required');
+        }
+        const cards = await this.cardService.getArchivedCardsByListId(listId);
+        const serviceResponse = new ServiceResponse(
+            ResponseStatus.Sucess,
+            'Get archived cards successfully',
+            cards,
+            StatusCodes.OK
+        )
+        return handleServiceResponse(serviceResponse, res);
+    }
 }

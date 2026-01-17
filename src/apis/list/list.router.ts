@@ -3,7 +3,7 @@ import ListController from "./list.controller";
 import { asyncHandler } from "@/common/middleware/asyncHandler";
 import { checkAuthentication } from "@/common/middleware/authentication";
 import { PERMISSIONS } from "@/common/constants/permissions";
-import { checkCrossListPermission, checkListPermission } from "@/common/middleware/authorization";
+import { checkBoardPermission, checkCrossListPermission, checkListPermission } from "@/common/middleware/authorization";
 
 export default function listRouter(listController: ListController): Router {
     const router = Router();
@@ -42,6 +42,11 @@ export default function listRouter(listController: ListController): Router {
         asyncHandler(checkAuthentication),
         asyncHandler(checkListPermission(PERMISSIONS.CARD_CREATE)),
         asyncHandler(listController.createCard)
+    )
+    router.get('/:listId/cards/archived',
+        asyncHandler(checkAuthentication),
+        asyncHandler(checkListPermission(PERMISSIONS.CARD_VIEW)),
+        asyncHandler(listController.getArchiveCards)
     )
     router.get('/:listId/cards',
         asyncHandler(checkAuthentication),
