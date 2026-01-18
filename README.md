@@ -34,7 +34,7 @@ Dự án được thiết kế theo kiến trúc hướng module (Modular Archit
 Trước khi bắt đầu, đảm bảo môi trường phát triển của bạn đáp ứng các yêu cầu sau:
 
 *   Node.js >= 18.0.0
-*   npm >= 9.0.0
+*   pnpm >= 9.0.0
 *   Docker & Docker Compose (Khuyến nghị để chạy Database)
 *   PostgreSQL 17 (Nếu cài đặt thủ công)
 
@@ -50,7 +50,7 @@ git clone <repository-url>
 cd TaskManagement-BE
 
 # Cài đặt các gói phụ thuộc
-npm install
+pnpm install
 ```
 
 ### 2. Cấu hình môi trường
@@ -89,7 +89,7 @@ Sử dụng Docker để khởi tạo môi trường Database nhanh chóng:
 
 ```bash
 # Khởi động PostgreSQL container
-npm run docker:dev:up
+pnpm docker:dev:up
 ```
 
 *Lệnh này sẽ chạy docker-compose.dev.yml, expose port 5434 (như cấu hình mặc định) để tránh xung đột với Postgres mặc định trên máy.*
@@ -99,7 +99,7 @@ npm run docker:dev:up
 Chạy migration để tạo cấu trúc bảng và tự động seed dữ liệu ban đầu (Roles & Permissions):
 
 ```bash
-npm run migration:run
+pnpm migration:run
 ```
 
 ### 5. Khởi động Server
@@ -107,7 +107,7 @@ npm run migration:run
 Chạy ứng dụng ở chế độ Development (Watch mode):
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Server sẽ sẵn sàng tại: `http://localhost:2409`
@@ -118,22 +118,22 @@ Quản lý thay đổi cấu trúc database thông qua TypeORM CLI.
 
 *   **Tạo Migration mới (Từ thay đổi Entity):**
     ```bash
-    npm run migration:generate src/common/migrations/MigrationName
+    pnpm migration:generate src/common/migrations/MigrationName
     ```
 
 *   **Tạo Migration rỗng:**
     ```bash
-    npm run migration:create src/common/migrations/MigrationName
+    pnpm migration:create src/common/migrations/MigrationName
     ```
 
 *   **Chạy Migration:**
     ```bash
-    npm run migration:run
+    pnpm migration:run
     ```
 
 *   **Hoàn tác Migration (Rollback):**
     ```bash
-    npm run migration:revert
+    pnpm migration:revert
     ```
 
 ## Scripts
@@ -142,12 +142,12 @@ Các lệnh script hữu ích trong `package.json`:
 
 | Script | Mô tả |
 | :--- | :--- |
-| `npm run dev` | Chạy server chế độ development (watch mode) |
-| `npm run build` | Build code TypeScript sang JavaScript |
-| `npm start` | Chạy server production |
-| `npm run test` | Chạy Unit Tests với Vitest |
-| `npm run docker:dev:up` | Bật các containers development |
-| `npm run docker:dev:down` | Tắt các containers development |
+| `pnpm dev` | Chạy server chế độ development (watch mode) |
+| `pnpm build` | Build code TypeScript sang JavaScript |
+| `pnpm start` | Chạy server production |
+| `pnpm test` | Chạy Unit Tests với Vitest |
+| `pnpm docker:dev:up` | Bật các containers development |
+| `pnpm docker:dev:down` | Tắt các containers development |
 
 ## API Documentation
 
