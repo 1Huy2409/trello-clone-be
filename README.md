@@ -1,304 +1,174 @@
 # Task Management Backend
 
-> Backend API cho ứng dụng quản lý công việc (Task Management) với tính năng quản lý workspace, board, task và phân quyền RBAC.
+Backend API chuyên nghiệp cho hệ thống quản lý công việc, cung cấp các tính năng quản lý workspace, board, task và hệ thống phân quyền RBAC linh hoạt.
 
-## 📋 Mục lục
+## Mục lục
 
-- [Công nghệ sử dụng](#công-nghệ-sử-dụng)
-- [Yêu cầu hệ thống](#yêu-cầu-hệ-thống)
-- [Cài đặt](#cài-đặt)
-- [Cấu hình](#cấu-hình)
-- [Chạy ứng dụng](#chạy-ứng-dụng)
-- [Database Migration](#database-migration)
-- [Cấu trúc dự án](#cấu-trúc-dự-án)
-- [API Documentation](#api-documentation)
-- [Testing](#testing)
-- [RBAC System](#rbac-system)
-- [Troubleshooting](#troubleshooting)
+1.  [Giới thiệu](#giới-thiệu)
+2.  [Công nghệ](#công-nghệ)
+3.  [Yêu cầu hệ thống](#yêu-cầu-hệ-thống)
+4.  [Hướng dẫn Setup cho Developer](#hướng-dẫn-setup-cho-developer)
+5.  [Database & Migrations](#database--migrations)
+6.  [Scripts](#scripts)
+7.  [API Documentation](#api-documentation)
+8.  [RBAC System](#rbac-system)
 
-## 🚀 Công nghệ sử dụng
+---
 
-- **Runtime**: Node.js v18+
-- **Framework**: Express.js 5.1.0
-- **Language**: TypeScript 5.9+
-- **Database**: PostgreSQL 17
-- **ORM**: TypeORM 0.3.27
-- **Authentication**:
-  - JWT (jsonwebtoken)
-  - Passport.js (Google OAuth, Local Strategy)
-- **Validation**: Zod 4.1.9
-- **API Documentation**: OpenAPI 3.0 (Swagger)
-- **Testing**: Vitest 3.2.4
-- **Containerization**: Docker & Docker Compose
+## Giới thiệu
 
-## 📦 Yêu cầu hệ thống
+Dự án được thiết kế theo kiến trúc hướng module (Modular Architecture), tối ưu hóa cho việc mở rộng và bảo trì. Hệ thống xử lý các nghiệp vụ cốt lõi của ứng dụng Task Management tương tự Trello, bao gồm xác thực nâng cao, quản lý trạng thái công việc và làm việc nhóm.
 
-- Node.js >= 18.0.0
-- npm >= 9.0.0
-- Docker Desktop (nếu chạy với Docker)
-- PostgreSQL 17 (nếu chạy local không dùng Docker)
+## Công nghệ
 
-## ⚙️ Cài đặt
+*   **Core**: Node.js (v18+), Express.js (v5.1+), TypeScript (v5.9+)
+*   **Database**: PostgreSQL 17
+*   **ORM**: TypeORM v0.3
+*   **Authentication**: Passport.js (JWT, Google OAuth, Local Strategy)
+*   **Validation**: Zod
+*   **Log & Error Handling**: Custom Error Handler, Middleware centralized
+*   **Environment**: Docker & Docker Compose
 
-### 1. Clone repository
+## Yêu cầu hệ thống
+
+Trước khi bắt đầu, đảm bảo môi trường phát triển của bạn đáp ứng các yêu cầu sau:
+
+*   Node.js >= 18.0.0
+*   npm >= 9.0.0
+*   Docker & Docker Compose (Khuyến nghị để chạy Database)
+*   PostgreSQL 17 (Nếu cài đặt thủ công)
+
+## Hướng dẫn Setup cho Developer
+
+Quy trình chuẩn để setup dự án sau khi pull code về máy:
+
+### 1. Khởi tạo dự án
 
 ```bash
+# Clone repository
 git clone <repository-url>
 cd TaskManagement-BE
-```
 
-### 2. Install dependencies
-
-```bash
+# Cài đặt các gói phụ thuộc
 npm install
 ```
 
-### 3. Cấu hình environment variables
+### 2. Cấu hình môi trường
 
-Copy file `.env.example` thành `.env`:
+Sao chép file cấu hình mẫu `.env.example` sang `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-Sau đó chỉnh sửa file `.env` với thông tin của bạn:
+Cập nhật các biến môi trường quan trọng trong file `.env`:
 
-```env
-# Server
+```ini
+# App
 PORT=2409
 
-# Database
+# Database Config (Tương thích với docker-compose.dev.yml)
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5434
 POSTGRES_USER=postgres
-POSTGRES_DB=TaskManagementDB
 POSTGRES_PASSWORD=your_password
+POSTGRES_DB=TaskManagementDB
 
-# JWT
-ACCESS_SECRET_KEY=your_secret_key_here
-ACCESS_TOKEN_EXPIRE=15m
-REFRESH_SECRET_KEY=your_refresh_secret_key_here
-REFRESH_TOKEN_EXPIRE=7d
+# Authentication
+ACCESS_SECRET_KEY=...
+REFRESH_SECRET_KEY=...
 
-# Google OAuth
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_CALLBACK_URL=http://localhost:{PORT}/api/v1/auth/google/callback
-
-# Email (Gmail SMTP)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your_email@gmail.com
-SMTP_PASS=your_app_password
-
-# Session
-SESSION_SECRET=your_session_secret
-
-# Frontend
-FRONTEND_BASE_URL=http://localhost:5173
+# OAuth & Mail (Optional cho dev local ban đầu)
+GOOGLE_CLIENT_ID=...
+SMTP_HOST=...
 ```
 
-## 🏃 Chạy ứng dụng
+### 3. Khởi chạy Database
 
-### Option 1: Chạy với Docker (Recommended)
-
-**Chỉ chạy Database trong Docker:**
+Sử dụng Docker để khởi tạo môi trường Database nhanh chóng:
 
 ```bash
-# Start PostgreSQL container
+# Khởi động PostgreSQL container
 npm run docker:dev:up
-
-# Chạy backend ở local
-npm run dev
 ```
 
-**Hoặc chạy full stack trong Docker:**
+*Lệnh này sẽ chạy docker-compose.dev.yml, expose port 5434 (như cấu hình mặc định) để tránh xung đột với Postgres mặc định trên máy.*
 
-```bash
-# Build và start containers
-docker-compose up --build
+### 4. Chạy Migrations & Seed Data
 
-# Hoặc chạy background
-docker-compose up -d
-
-# Xem logs
-docker-compose logs -f backend
-
-# Stop containers
-docker-compose down
-
-# Stop và xóa volumes (reset database)
-docker-compose down -v
-```
-
-### Option 2: Chạy local (Không Docker)
-
-**Yêu cầu:**
-
-- PostgreSQL 17 đã cài đặt trên máy
-- Database đã được tạo
-
-```bash
-# Update .env với thông tin database local
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_USER=postgres
-POSTGRES_DB=TaskManagementDB
-POSTGRES_PASSWORD=your_password
-
-# Chạy ứng dụng
-npm run dev
-```
-
-Ứng dụng sẽ chạy tại: `http://localhost:${PORT}`
-
-## 🗄️ Database Migration
-
-### Tạo migration mới (từ thay đổi entities)
-
-```bash
-npm run migration:generate src/common/migrations/MigrationName
-```
-
-### Tạo migration rỗng
-
-```bash
-npm run migration:create src/common/migrations/MigrationName
-```
-
-### Chạy migrations
+Chạy migration để tạo cấu trúc bảng và tự động seed dữ liệu ban đầu (Roles & Permissions):
 
 ```bash
 npm run migration:run
 ```
 
-### Xem trạng thái migrations
+### 5. Khởi động Server
+
+Chạy ứng dụng ở chế độ Development (Watch mode):
 
 ```bash
-npm run migration:show
+npm run dev
 ```
 
-### Rollback migration gần nhất
+Server sẽ sẵn sàng tại: `http://localhost:2409`
 
-```bash
-npm run migration:revert
-```
+## Database & Migrations
 
-### Seed data (Roles & Permissions)
+Quản lý thay đổi cấu trúc database thông qua TypeORM CLI.
 
-Migrations seed được tự động chạy khi start ứng dụng lần đầu. Nếu cần chạy lại:
+*   **Tạo Migration mới (Từ thay đổi Entity):**
+    ```bash
+    npm run migration:generate src/common/migrations/MigrationName
+    ```
 
-```bash
-npm run migration:run
-```
+*   **Tạo Migration rỗng:**
+    ```bash
+    npm run migration:create src/common/migrations/MigrationName
+    ```
 
-Migration sẽ tạo:
+*   **Chạy Migration:**
+    ```bash
+    npm run migration:run
+    ```
 
-- 6 roles: `workspace_owner`, `workspace_admin`, `workspace_member`, `board_owner`, `board_admin`, `board_member`
-- 12 permissions: workspace và board permissions
+*   **Hoàn tác Migration (Rollback):**
+    ```bash
+    npm run migration:revert
+    ```
 
-## 📁 Cấu trúc dự án
+## Scripts
 
-```
-src/
-├── api-docs/                 # OpenAPI documentation
-│   ├── openAPIDocumentGenerator.ts
-│   ├── openAPIResponseBuilder.ts
-│   └── openAPIRouter.ts
-├── apis/                     # API modules
-│   ├── auth/                 # Authentication module
-│   │   ├── auth.controller.ts
-│   │   ├── auth.service.ts
-│   │   ├── auth.router.ts
-│   │   ├── repositories/
-│   │   ├── schemas/
-│   │   └── strategy/         # Passport strategies
-│   ├── user/                 # User module
-│   ├── workspace/            # Workspace module
-│   │   ├── workspace.controller.ts
-│   │   ├── workspace.service.ts
-│   │   ├── workspace.router.ts
-│   │   ├── repositories/
-│   │   ├── mapper/
-│   │   └── schemas/
-│   ├── board/                # Board module
-│   └── healthcheck/          # Health check endpoint
-├── common/
-│   ├── constants/            # Constants (permissions, etc.)
-│   ├── entities/             # TypeORM entities
-│   │   ├── user.entity.ts
-│   │   ├── workspace.entity.ts
-│   │   ├── board.entity.ts
-│   │   ├── role.entity.ts
-│   │   ├── permission.entity.ts
-│   │   └── ...
-│   ├── handler/              # Error handlers
-│   ├── middleware/           # Middlewares
-│   │   ├── authentication.ts
-│   │   ├── authorization.ts
-│   │   └── asyncHandler.ts
-│   ├── migrations/           # Database migrations
-│   ├── repositories/         # Base repository interfaces
-│   ├── router/               # Main router
-│   └── utils/                # Utility functions
-│       ├── auth.util.ts
-│       ├── handlePassword.ts
-│       └── mailService.ts
-├── config/
-│   └── db.config.ts          # Database configuration
-├── types/                    # TypeScript type definitions
-└── index.ts                  # Application entry point
-```
+Các lệnh script hữu ích trong `package.json`:
 
-## 📚 API Documentation
+| Script | Mô tả |
+| :--- | :--- |
+| `npm run dev` | Chạy server chế độ development (watch mode) |
+| `npm run build` | Build code TypeScript sang JavaScript |
+| `npm start` | Chạy server production |
+| `npm run test` | Chạy Unit Tests với Vitest |
+| `npm run docker:dev:up` | Bật các containers development |
+| `npm run docker:dev:down` | Tắt các containers development |
 
-Sau khi start server, truy cập Swagger UI tại:
+## API Documentation
 
-```
-http://localhost:${PORT}/api-docs
-```
+Mọi endpoint đều được tài liệu hóa bằng OpenAPI (Swagger).
+Truy cập giao diện Swagger UI tại:
 
-## 🔐 RBAC System
+👉 `http://localhost:2409/api-docs`
 
-Hệ thống phân quyền dựa trên Role-Based Access Control (RBAC) với 2 levels:
+## RBAC System
 
-### Workspace Level Roles
+Hệ thống phân quyền được chia thành 2 cấp độ:
 
-| Role               | Permissions                                            |
-| ------------------ | ------------------------------------------------------ |
-| `workspace_owner`  | Tất cả quyền trong workspace (bao gồm xóa workspace)   |
-| `workspace_admin`  | Quản lý workspace, boards, members (trừ xóa workspace) |
-| `workspace_member` | Chỉ xem workspace và boards                            |
+### Workspace Scope
+*   **workspace_owner**: Quyền cao nhất, quản lý toàn bộ workspace và billing.
+*   **workspace_admin**: Quản lý thành viên và boards.
+*   **workspace_member**: Quyền cơ bản, truy cập và làm việc trên các boards được gán.
 
-### Board Level Roles
+### Board Scope
+*   **board_owner**: Người tạo hoặc sở hữu board.
+*   **board_admin**: Quản lý settings và thành viên trong board.
+*   **board_member**: Thao tác tasks, lists trong board.
 
-| Role           | Permissions                                  |
-| -------------- | -------------------------------------------- |
-| `board_owner`  | Tất cả quyền trong board (bao gồm xóa board) |
-| `board_admin`  | Quản lý board, members (trừ xóa board)       |
-| `board_member` | Chỉ xem board                                |
-
-### Permissions
-
-#### Workspace Permissions
-
-- `workspace:view` - Xem workspace
-- `workspace:create` - Tạo workspace
-- `workspace:update` - Cập nhật workspace
-- `workspace:delete` - Xóa workspace
-- `workspace:manage_members` - Quản lý members
-- `workspace:view_members` - Xem members
-
-#### Board Permissions
-
-- `board:view` - Xem board
-- `board:create` - Tạo board
-- `board:update` - Cập nhật board
-- `board:delete` - Xóa board
-- `board:manage_members` - Quản lý members
-- `board:view_members` - Xem members
-
-## 👥 Team
-
-- **Developer**: Nguyen Huu Nhat Huy
-- **Email**: nhathuy2409@gmail.com
+---
+**Maintainer**: Nguyen Huu Nhat Huy
