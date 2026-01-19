@@ -1,13 +1,13 @@
 # Task Management Backend
 
-Backend API chuyên nghiệp cho hệ thống quản lý công việc, cung cấp các tính năng quản lý workspace, board, task và hệ thống phân quyền RBAC linh hoạt.
+Professional backend API for a task management system, providing features for workspace, board, and task management, along with a flexible RBAC (Role-Based Access Control) system.
 
-## Mục lục
+## Table of Contents
 
-1.  [Giới thiệu](#giới-thiệu)
-2.  [Công nghệ](#công-nghệ)
-3.  [Yêu cầu hệ thống](#yêu-cầu-hệ-thống)
-4.  [Hướng dẫn Setup cho Developer](#hướng-dẫn-setup-cho-developer)
+1.  [Introduction](#introduction)
+2.  [Technologies](#technologies)
+3.  [System Requirements](#system-requirements)
+4.  [Setup Guide for Developers](#setup-guide-for-developers)
 5.  [Database & Migrations](#database--migrations)
 6.  [Scripts](#scripts)
 7.  [API Documentation](#api-documentation)
@@ -15,59 +15,59 @@ Backend API chuyên nghiệp cho hệ thống quản lý công việc, cung cấ
 
 ---
 
-## Giới thiệu
+## Introduction
 
-Dự án được thiết kế theo kiến trúc hướng module (Modular Architecture), tối ưu hóa cho việc mở rộng và bảo trì. Hệ thống xử lý các nghiệp vụ cốt lõi của ứng dụng Task Management tương tự Trello, bao gồm xác thực nâng cao, quản lý trạng thái công việc và làm việc nhóm.
+This project is designed using Modular Architecture, optimized for scalability and maintenance. The system handles core business logic for a Task Management application similar to Trello, including advanced authentication, task status management, and team collaboration.
 
-## Công nghệ
+## Technologies
 
 *   **Core**: Node.js (v18+), Express.js (v5.1+), TypeScript (v5.9+)
 *   **Database**: PostgreSQL 17
 *   **ORM**: TypeORM v0.3
 *   **Authentication**: Passport.js (JWT, Google OAuth, Local Strategy)
 *   **Validation**: Zod
-*   **Log & Error Handling**: Custom Error Handler, Middleware centralized
+*   **Log & Error Handling**: Custom Error Handler, Centralized Middleware
 *   **Environment**: Docker & Docker Compose
 
-## Yêu cầu hệ thống
+## System Requirements
 
-Trước khi bắt đầu, đảm bảo môi trường phát triển của bạn đáp ứng các yêu cầu sau:
+Before getting started, ensure your development environment meets the following requirements:
 
 *   Node.js >= 18.0.0
 *   pnpm >= 9.0.0
-*   Docker & Docker Compose (Khuyến nghị để chạy Database)
-*   PostgreSQL 17 (Nếu cài đặt thủ công)
+*   Docker & Docker Compose (Recommended for running the Database)
+*   PostgreSQL 17 (If installed manually)
 
-## Hướng dẫn Setup cho Developer
+## Setup Guide for Developers
 
-Quy trình chuẩn để setup dự án sau khi pull code về máy:
+Standard procedure to set up the project after pulling the code:
 
-### 1. Khởi tạo dự án
+### 1. Initialize Project
 
 ```bash
 # Clone repository
 git clone <repository-url>
 cd TaskManagement-BE
 
-# Cài đặt các gói phụ thuộc
+# Install dependencies
 pnpm install
 ```
 
-### 2. Cấu hình môi trường
+### 2. Environment Configuration
 
-Sao chép file cấu hình mẫu `.env.example` sang `.env`:
+Copy the sample configuration file `.env.example` to `.env`:
 
 ```bash
 cp .env.example .env
 ```
 
-Cập nhật các biến môi trường quan trọng trong file `.env`:
+Update critical environment variables in the `.env` file:
 
 ```ini
 # App
 PORT=2409
 
-# Database Config (Tương thích với docker-compose.dev.yml)
+# Database Config (Compatible with docker-compose.dev.yml)
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5434
 POSTGRES_USER=postgres
@@ -78,97 +78,97 @@ POSTGRES_DB=TaskManagementDB
 ACCESS_SECRET_KEY=...
 REFRESH_SECRET_KEY=...
 
-# OAuth & Mail (Optional cho dev local ban đầu)
+# OAuth & Mail (Optional for initial local dev)
 GOOGLE_CLIENT_ID=...
 SMTP_HOST=...
 ```
 
-### 3. Khởi chạy Database
+### 3. Start Database
 
-Sử dụng Docker để khởi tạo môi trường Database nhanh chóng:
+Use Docker to quickly initialize the Database environment:
 
 ```bash
-# Khởi động PostgreSQL container
+# Start PostgreSQL container
 pnpm docker:dev:up
 ```
 
-*Lệnh này sẽ chạy docker-compose.dev.yml, expose port 5434 (như cấu hình mặc định) để tránh xung đột với Postgres mặc định trên máy.*
+*This command runs `docker-compose.dev.yml`, exposing port 5434 (as per default config) to avoid conflicts with the default Postgres on your machine.*
 
-### 4. Chạy Migrations & Seed Data
+### 4. Run Migrations & Seed Data
 
-Chạy migration để tạo cấu trúc bảng và tự động seed dữ liệu ban đầu (Roles & Permissions):
+Run migrations to create the table structure and automatically seed initial data (Roles & Permissions):
 
 ```bash
 pnpm migration:run
 ```
 
-### 5. Khởi động Server
+### 5. Start Server
 
-Chạy ứng dụng ở chế độ Development (Watch mode):
+Run the application in Development mode (Watch mode):
 
 ```bash
 pnpm dev
 ```
 
-Server sẽ sẵn sàng tại: `http://localhost:2409`
+The server will be ready at: `http://localhost:2409`
 
 ## Database & Migrations
 
-Quản lý thay đổi cấu trúc database thông qua TypeORM CLI.
+Manage database schema changes via TypeORM CLI.
 
-*   **Tạo Migration mới (Từ thay đổi Entity):**
+*   **Create New Migration (From Entity changes):**
     ```bash
     pnpm migration:generate src/common/migrations/MigrationName
     ```
 
-*   **Tạo Migration rỗng:**
+*   **Create Empty Migration:**
     ```bash
     pnpm migration:create src/common/migrations/MigrationName
     ```
 
-*   **Chạy Migration:**
+*   **Run Migrations:**
     ```bash
     pnpm migration:run
     ```
 
-*   **Hoàn tác Migration (Rollback):**
+*   **Revert Migration:**
     ```bash
     pnpm migration:revert
     ```
 
 ## Scripts
 
-Các lệnh script hữu ích trong `package.json`:
+Useful script commands in `package.json`:
 
-| Script | Mô tả |
+| Script | Description |
 | :--- | :--- |
-| `pnpm dev` | Chạy server chế độ development (watch mode) |
-| `pnpm build` | Build code TypeScript sang JavaScript |
-| `pnpm start` | Chạy server production |
-| `pnpm test` | Chạy Unit Tests với Vitest |
-| `pnpm docker:dev:up` | Bật các containers development |
-| `pnpm docker:dev:down` | Tắt các containers development |
+| `pnpm dev` | Run server in development mode (watch mode) |
+| `pnpm build` | Build TypeScript code to JavaScript |
+| `pnpm start` | Run production server |
+| `pnpm test` | Run Unit Tests with Vitest |
+| `pnpm docker:dev:up` | Start development containers |
+| `pnpm docker:dev:down` | Stop development containers |
 
 ## API Documentation
 
-Mọi endpoint đều được tài liệu hóa bằng OpenAPI (Swagger).
-Truy cập giao diện Swagger UI tại:
+All endpoints are documented using OpenAPI (Swagger).
+Access the Swagger UI at:
 
 👉 `http://localhost:2409/api-docs`
 
 ## RBAC System
 
-Hệ thống phân quyền được chia thành 2 cấp độ:
+The permission system is divided into 2 levels:
 
 ### Workspace Scope
-*   **workspace_owner**: Quyền cao nhất, quản lý toàn bộ workspace và billing.
-*   **workspace_admin**: Quản lý thành viên và boards.
-*   **workspace_member**: Quyền cơ bản, truy cập và làm việc trên các boards được gán.
+*   **workspace_owner**: Highest privilege, manages the entire workspace and billing.
+*   **workspace_admin**: Manages members and boards.
+*   **workspace_member**: Basic privileges, access and work on assigned boards.
 
 ### Board Scope
-*   **board_owner**: Người tạo hoặc sở hữu board.
-*   **board_admin**: Quản lý settings và thành viên trong board.
-*   **board_member**: Thao tác tasks, lists trong board.
+*   **board_owner**: Creator or owner of the board.
+*   **board_admin**: Manages settings and members within the board.
+*   **board_member**: Manipulates tasks and lists within the board.
 
 ---
 **Maintainer**: Nguyen Huu Nhat Huy
